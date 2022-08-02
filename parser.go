@@ -70,7 +70,7 @@ func MustParse(parameters any, options ...Option) (*Parsed, error) {
 		return &ret, err
 	}
 
-	ret.refresh(true) // update dynamic and standard parameters
+	ret.refresh(true) // update xtypes and standard parameters
 
 	return &ret, nil
 }
@@ -254,9 +254,9 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 
 		ret.boolean = describeType(fieldVal) == "bool"
 
-		ret.validFn = toDynamic(fieldVal).ValueValid
-		ret.setValueFn = toDynamic(fieldVal).UnmarshalParam
-		ret.getDefaultFn = toDynamic(fieldVal).GetDefaultValue
+		ret.validFn = toXType(fieldVal).ValueValid
+		ret.setValueFn = toXType(fieldVal).UnmarshalParam
+		ret.getDefaultFn = toXType(fieldVal).GetDefaultValue
 
 		// some types know how to redact themselves (for example,
 		// xtype.URL know how to redact the password)
@@ -335,16 +335,10 @@ func processSpecialFlags(appConfig config, parsed *Parsed, opts settings) {
 	panic("Auto usage termination callback function did not terminated the application")
 }
 
-func panicOnNil(v *string) {
-	if v == nil {
-		panic("bug: tried to set non-dynamic parameter to nil")
-	}
-}
-
 func describeType(val reflect.Value) string {
 	t := val.Type()
 	if isXType(t) {
-		return dynamicTypeName(val)
+		return describeXType(val)
 	}
 
 	return t.Name()

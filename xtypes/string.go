@@ -6,9 +6,7 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// String is parameter for application configuration that hods strings that can
-// be updated without restarting the application. An UpdateFn can be provided
-// to be notified about changes to the value.
+// String is an XType for strings.
 type String struct {
 	DefaultValue string
 	UpdateFn     func(string)
@@ -18,7 +16,7 @@ type String struct {
 	}
 }
 
-var _ types.DynamicType = &String{}
+var _ types.XType = &String{}
 
 // UnmarshalParam parses the input as a string.
 func (d *String) UnmarshalParam(in *string) error {

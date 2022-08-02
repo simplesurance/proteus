@@ -11,7 +11,7 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// ECDSAPubKey is a dynamic parameter for values of type *ecdsa.PublicKey.
+// ECDSAPubKey is a xtype for values of type *ecdsa.PublicKey.
 type ECDSAPubKey struct {
 	DefaultValue  *ecdsa.PublicKey
 	UpdateFn      func(*ecdsa.PublicKey)
@@ -22,7 +22,7 @@ type ECDSAPubKey struct {
 	}
 }
 
-var _ types.DynamicType = &ECDSAPubKey{}
+var _ types.XType = &ECDSAPubKey{}
 
 // UnmarshalParam parses the input as a string.
 func (d *ECDSAPubKey) UnmarshalParam(in *string) error {

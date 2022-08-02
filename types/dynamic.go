@@ -1,26 +1,25 @@
 package types
 
-// DynamicType is a configuration parameter that can be updated without
-// without reloading the application.
+// XType is a configuration parameter parameter that supports being updated
+// without restarting the application, as well as other features each type
+// might decide to support.
 //
-// Dynamic types must also implement a
+// XTypes types must not only implement this interface, but also implement a
 // function "Value() T", that takes no parameters and returns an arbitrary
 // type T. This method will be used by the application to read the value
 // of the parameter, and used by the configuration package to show how to
-// use the package. If one dynamic type implements a function
+// use the package. Example of a Value function:
 //
 //     Value() *url.URL
 //
-// Then when the user ask for usage information (for example by providing
-// --help), the application will show:
+// The returned value, when not immutable, will be a copy of the parameter
+// value. The value returned by this function might change, if its value
+// was read from a source that supports updating values without application
+// restart, like file.
 //
-//     - {fieldName}:*url.URL
-//
-// Helping the user know that he is expected to provide a URL for the parameter
-// named {fieldName}. If for some case the resulting usage information is
-// not appropriated, the type can also implement DynamicTypeDescriber to
-// change that.
-type DynamicType interface {
+// Values of this type may optionally implement the Redactor or the
+// TypeDescriber inteface (or both).
+type XType interface {
 	UnmarshalParam(*string) error
 
 	// GetDefaultValue reads a string representation of the value. This
@@ -32,17 +31,19 @@ type DynamicType interface {
 	ValueValid(string) error
 }
 
-// Redactor allows part of a value to be redacted.
+// Redactor allows part of a value to be redacted. One example of a use for
+// a redactor is URL, which can automatically redact the password part of the
+// URL.
 type Redactor interface {
 	// RedactValue redacts part of the value, if it contains sensitive
 	// information.
 	RedactValue(string) string
 }
 
-// DynamicTypeDescriber describes what kind of value must be provided by
+// TypeDescriber describes what kind of value must be provided by
 // a configuration parameter. Implementation is optional, and should only
 // be implemented when the default generated usage information is not
 // appropriated.
-type DynamicTypeDescriber interface {
-	DescribeDynamicType() string
+type TypeDescriber interface {
+	DescribeType() string
 }

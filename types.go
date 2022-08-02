@@ -44,7 +44,7 @@ type paramSetField struct {
 	boolean  bool
 	path     string
 
-	isDynamic    bool
+	isXtype      bool // implements the types.XType interface
 	setValueFn   func(v *string) error
 	validFn      func(v string) error
 	getDefaultFn func() (string, error)

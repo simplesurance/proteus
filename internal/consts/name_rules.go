@@ -2,6 +2,12 @@ package consts
 
 import "regexp"
 
+const (
+	// RedactedPlaceholder is a string that is shown instead of a secret, to
+	// avoid leaking it.
+	RedactedPlaceholder = "REDACTED"
+)
+
 // ParamNameRE is the regular expression used to valid parameter and parameter
 // set names. A name must:
 //
