@@ -31,6 +31,7 @@ func TestDefaultValueAllTypes(t *testing.T) {
 		I16      int16                 `param:",optional"`
 		I32      int32                 `param:",optional"`
 		I64      int64                 `param:",optional"`
+		U        uint                  `param:",optional"`
 		UI8      uint8                 `param:",optional"`
 		UI16     uint16                `param:",optional"`
 		UI32     uint32                `param:",optional"`
@@ -48,6 +49,7 @@ func TestDefaultValueAllTypes(t *testing.T) {
 		I16:  math.MinInt16,
 		I32:  math.MinInt32,
 		I64:  math.MinInt64,
+		U:    math.MaxUint,
 		UI8:  math.MaxUint8,
 		UI16: math.MaxUint16,
 		UI32: math.MaxUint32,
@@ -86,6 +88,7 @@ func TestDefaultValueAllTypes(t *testing.T) {
 	assert.Equal(t, cfg.I32, int32(math.MinInt32))
 	assert.Equal(t, cfg.I64, int64(math.MinInt64))
 	assert.Equal(t, cfg.UI8, uint8(math.MaxUint8))
+	assert.Equal(t, cfg.U, uint(math.MaxUint))
 	assert.Equal(t, cfg.UI16, uint16(math.MaxUint16))
 	assert.Equal(t, cfg.UI32, uint32(math.MaxUint32))
 	assert.Equal(t, cfg.UI64, uint64(math.MaxUint64))
