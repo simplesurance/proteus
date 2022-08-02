@@ -32,7 +32,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/internal/consts"
 	"github.com/simplesurance/proteus/sources"
 	"github.com/simplesurance/proteus/specialflags"
 	"github.com/simplesurance/proteus/types"
@@ -134,7 +134,7 @@ func readParam(
 ) (key, value string, _ error) {
 	if !strings.HasPrefix(token, "-") {
 		// is a flagset
-		if !proteus.ParamNameRE.MatchString(token) {
+		if !consts.ParamNameRE.MatchString(token) {
 			return "", "", fmt.Errorf("not a parameter, not a valid flagset name: %q", token)
 		}
 
@@ -148,10 +148,10 @@ func readParam(
 	paramName, value, ok := strings.Cut(token, "=")
 	if ok {
 		// format of token is key=value
-		if !proteus.ParamNameRE.MatchString(paramName) {
+		if !consts.ParamNameRE.MatchString(paramName) {
 			return "", "", fmt.Errorf(
 				"%q is not valid for a parameter or flagset name (valid=%s)",
-				paramName, proteus.ParamNameRE)
+				paramName, consts.ParamNameRE)
 		}
 
 		return paramName, value, nil
@@ -159,10 +159,10 @@ func readParam(
 
 	paramName = token
 
-	if !proteus.ParamNameRE.MatchString(paramName) {
+	if !consts.ParamNameRE.MatchString(paramName) {
 		return "", "", fmt.Errorf(
 			"%q is not valid for a parameter or flagset name (valid=%s)",
-			paramName, proteus.ParamNameRE)
+			paramName, consts.ParamNameRE)
 	}
 
 	isBool, found := isBoolFn(paramName)
