@@ -98,17 +98,17 @@ func mustInferConfigFromValue(value any, opts settings) (config, error) {
 		return nil, fmt.Errorf("walking root fields of the configuration struct: %w", err)
 	}
 
-	var violations ErrViolations
+	var violations types.ErrViolations
 	for _, member := range members {
 		name, tag, err := parseParam(member.field, member.value)
 		if err != nil {
-			var paramViolations ErrViolations
+			var paramViolations types.ErrViolations
 			if errors.As(err, &paramViolations) {
 				violations = append(violations, paramViolations...)
 				continue
 			}
 
-			violations = append(violations, Violation{
+			violations = append(violations, types.Violation{
 				Path:    member.Path,
 				Message: fmt.Sprintf("error reading struct tag: %v", err),
 			})
@@ -120,7 +120,7 @@ func mustInferConfigFromValue(value any, opts settings) (config, error) {
 		}
 
 		if !ParamNameRE.MatchString(name) {
-			violations = append(violations, Violation{
+			violations = append(violations, types.Violation{
 				Path: member.Path,
 				Message: fmt.Sprintf("Name %q is invalid for parameter or set (valid: %s)",
 					name, ParamNameRE)})
@@ -130,13 +130,13 @@ func mustInferConfigFromValue(value any, opts settings) (config, error) {
 			// is a set or parameters
 			d, err := parseParamSet(name, member.Path, member.value)
 			if err != nil {
-				var setViolations ErrViolations
+				var setViolations types.ErrViolations
 				if errors.As(err, &setViolations) {
 					violations = append(violations, setViolations...)
 					continue
 				}
 
-				violations = append(violations, Violation{
+				violations = append(violations, types.Violation{
 					Path:    member.Path,
 					SetName: name,
 					Message: fmt.Sprintf("parsing set: %v", err),
@@ -170,11 +170,11 @@ func parseParamSet(setName, setPath string, val reflect.Value) (flagSet, error) 
 		fields: make(map[string]flagSetField, len(members)),
 	}
 
-	violations := ErrViolations{}
+	violations := types.ErrViolations{}
 	for _, member := range members {
 		paramName, tag, err := parseParam(member.field, member.value)
 		if err != nil {
-			violations = append(violations, Violation{
+			violations = append(violations, types.Violation{
 				Path:    member.Path,
 				Message: err.Error(),
 			})
@@ -186,7 +186,7 @@ func parseParamSet(setName, setPath string, val reflect.Value) (flagSet, error) 
 		}
 
 		if !ParamNameRE.MatchString(paramName) {
-			violations = append(violations, Violation{
+			violations = append(violations, types.Violation{
 				Path:    member.Path,
 				SetName: setName,
 				Message: fmt.Sprintf("Name %q is invalid for parameter or set (valid: %s)",
@@ -276,10 +276,10 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 
 func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 	// support special flags
-	var violations ErrViolations
+	var violations types.ErrViolations
 	if opts.autoUsageExitFn != nil {
 		if conflictingParam, ok := appConfig[""].fields[specialflags.Help.Name]; ok {
-			violations = append(violations, Violation{
+			violations = append(violations, types.Violation{
 				ParamName: specialflags.Help.Name,
 				Path:      conflictingParam.path,
 				Message:   "The help parameter cannot be used with the auto-usage is requested",

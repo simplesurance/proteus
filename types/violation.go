@@ -1,4 +1,4 @@
-package proteus
+package types
 
 import (
 	"fmt"

@@ -34,7 +34,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/simplesurance/proteus"
 	"github.com/simplesurance/proteus/sources"
 	"github.com/simplesurance/proteus/types"
 )
@@ -99,9 +98,9 @@ func parse(
 		}
 	}
 
-	var violations proteus.ErrViolations
+	var violations types.ErrViolations
 	for envName := range env {
-		violations = append(violations, proteus.Violation{
+		violations = append(violations, types.Violation{
 			Message: fmt.Sprintf(
 				"Environment variable %q has the %q prefix, but is does not match any expected application parameter",
 				envName, prefix),
