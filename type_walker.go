@@ -3,6 +3,8 @@ package proteus
 import (
 	"reflect"
 	"strings"
+
+	"github.com/simplesurance/proteus/types"
 )
 
 // flatWalk allows visiting all fields of a struct, including embedded values.
@@ -10,7 +12,7 @@ func flatWalk(setName, setPath string, val reflect.Value) (map[string]fieldAndVa
 	foundFields := map[string]fieldAndValue{}
 
 	if val.Type().Kind() != reflect.Struct {
-		return nil, ErrViolations([]Violation{
+		return nil, types.ErrViolations([]types.Violation{
 			{
 				SetName: setName,
 				Message: "only structs can be flagsets",
@@ -18,7 +20,7 @@ func flatWalk(setName, setPath string, val reflect.Value) (map[string]fieldAndVa
 		})
 	}
 
-	var violations ErrViolations
+	var violations types.ErrViolations
 	// recursive function to walk on fields, including the ones on embedded
 	// structs
 	var walker func(reflect.Value, string)
@@ -36,7 +38,7 @@ func flatWalk(setName, setPath string, val reflect.Value) (map[string]fieldAndVa
 			// duplicated fields are invalid
 			normalizedName := strings.ToLower(field.Name)
 			if _, ok := foundFields[normalizedName]; ok {
-				violations = append(violations, Violation{
+				violations = append(violations, types.Violation{
 					SetName: setName,
 					Path:    path,
 					Message: "Duplicated field",
