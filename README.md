@@ -48,15 +48,6 @@ with a parameter on other namespace.
 ```go
 package main
 
-import (
-	"fmt"
-	"os"
-
-	"github.com/simplesurance/proteus"
-	"github.com/simplesurance/proteus/sources/cfgenv"
-	"github.com/simplesurance/proteus/sources/cfgflags"
-)
-
 func main() {
 	params := struct {
 		HTTP httpParams
@@ -123,16 +114,6 @@ more additional functionality.
 
 ```go
 package main
-
-import (
-	"fmt"
-	"os"
-
-	"github.com/simplesurance/proteus"
-	"github.com/simplesurance/proteus/sources/cfgenv"
-	"github.com/simplesurance/proteus/sources/cfgflags"
-	"github.com/simplesurance/proteus/xtypes"
-)
 
 func main() {
 	params := struct {
