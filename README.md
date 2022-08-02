@@ -101,10 +101,9 @@ type dbParams struct {
 ```bash
 CFG__DB__SERVER=localhost go run *.go \
   db \ 
-    -pwd sa \
-    -server localhost \
-    -user sa \
     -database library \
+    -user sa \
+    -pwd sa \
   http \  
     -bind_port 5432 \
     -pwd secret-token
@@ -119,5 +118,48 @@ with command-line flags.
 
 ### XTypes
 
-_XTypes_ are types provided by proteus to handle complex types and to provide
+_XTypes_ are types provided by _proteus_ to handle complex types and to provide
 more additional functionality.
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/sources/cfgenv"
+	"github.com/simplesurance/proteus/sources/cfgflags"
+	"github.com/simplesurance/proteus/xtypes"
+)
+
+func main() {
+	params := struct {
+		BindPort   uint16
+		PrivKey    *xtypes.RSAPrivateKey
+		RequestLog *xtypes.OneOf
+	}{
+		RequestLog: &xtypes.OneOf{
+			Choices: []string{"none", "basic", "full"},
+			UpdateFn: func(s string) {
+				fmt.Printf("Log level changed to %s", s)
+			},
+		},
+	}
+
+	parsed, err := proteus.MustParse(&params, proteus.WithSources(
+		cfgflags.New(),
+		cfgenv.New("CFG"),
+	))
+	if err != nil {
+		parsed.ErrUsage(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Starting HTTP server on :%d with an RSA key of size %d, log level %s\n",
+		params.BindPort,
+		params.PrivKey.Value().Size(),
+		params.RequestLog.Value())
+}
+```
