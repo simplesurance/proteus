@@ -1,7 +1,7 @@
 //go:build unittest || !integrationtest
 // +build unittest !integrationtest
 
-package dyntypes_test
+package xtypes_test
 
 import (
 	"bytes"
@@ -12,16 +12,16 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/simplesurance/proteus"
-	"github.com/simplesurance/proteus/dyntypes"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
+	"github.com/simplesurance/proteus/xtypes"
 )
 
 func TestSimpleURL(t *testing.T) {
 	const fullURLString = "https://user:pass@asdf.com/x?a=b#segment"
 
 	params := struct {
-		URL *dyntypes.URL
+		URL *xtypes.URL
 	}{}
 
 	source := types.ParamValues{
@@ -49,9 +49,9 @@ func TestDefaultURL(t *testing.T) {
 	defaultURL, _ := url.Parse(defaultURLString)
 
 	params := struct {
-		URL *dyntypes.URL `param:",optional"`
+		URL *xtypes.URL `param:",optional"`
 	}{
-		URL: &dyntypes.URL{DefaultValue: defaultURL},
+		URL: &xtypes.URL{DefaultValue: defaultURL},
 	}
 
 	source := types.ParamValues{
@@ -74,9 +74,9 @@ func TestDefaultURL(t *testing.T) {
 
 func TestEmptyURL(t *testing.T) {
 	params := struct {
-		URL *dyntypes.URL
+		URL *xtypes.URL
 	}{
-		URL: &dyntypes.URL{ValidateFn: func(u *url.URL) error { return nil }},
+		URL: &xtypes.URL{ValidateFn: func(u *url.URL) error { return nil }},
 	}
 
 	source := types.ParamValues{
@@ -109,9 +109,9 @@ func TestCustomValidator(t *testing.T) {
 	}
 
 	params := struct {
-		URL *dyntypes.URL
+		URL *xtypes.URL
 	}{
-		URL: &dyntypes.URL{ValidateFn: validFn},
+		URL: &xtypes.URL{ValidateFn: validFn},
 	}
 
 	cases := []struct {
