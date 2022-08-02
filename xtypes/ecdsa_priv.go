@@ -8,10 +8,11 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/simplesurance/proteus/internal/consts"
 	"github.com/simplesurance/proteus/types"
 )
 
-// ECDSAPrivateKey is a dynamic parameter for values of type *ecdsa.PrivateKey.
+// ECDSAPrivateKey is a xtype for *ecdsa.PrivateKey.
 type ECDSAPrivateKey struct {
 	DefaultValue  *ecdsa.PrivateKey
 	UpdateFn      func(*ecdsa.PrivateKey)
@@ -22,7 +23,8 @@ type ECDSAPrivateKey struct {
 	}
 }
 
-var _ types.DynamicType = &ECDSAPrivateKey{}
+var _ types.XType = &ECDSAPrivateKey{}
+var _ types.Redactor = &ECDSAPrivateKey{}
 
 // UnmarshalParam parses the input as a string.
 func (d *ECDSAPrivateKey) UnmarshalParam(in *string) error {
@@ -71,6 +73,11 @@ func (d *ECDSAPrivateKey) ValueValid(s string) error {
 // information.
 func (d *ECDSAPrivateKey) GetDefaultValue() (string, error) {
 	return "<secret>", nil
+}
+
+// RedactValue fully redacts the private key, to avoid leaking secrets.
+func (d *ECDSAPrivateKey) RedactValue(string) string {
+	return consts.RedactedPlaceholder
 }
 
 func parseECPrivKey(v string, base64Enc *base64.Encoding) (*ecdsa.PrivateKey, error) {

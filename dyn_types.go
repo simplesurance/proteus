@@ -14,7 +14,7 @@ const invalidValue = "<invalid>"
 // - the value belonging to a type that implements a method Value() T, where
 //   the type T any supported value.
 func isXType(ty reflect.Type) bool {
-	tyUnmarshaler := reflect.TypeOf((*types.DynamicType)(nil)).Elem()
+	tyUnmarshaler := reflect.TypeOf((*types.XType)(nil)).Elem()
 	if !ty.AssignableTo(tyUnmarshaler) {
 		return false
 	}
@@ -31,12 +31,16 @@ func isXType(ty reflect.Type) bool {
 	return true
 }
 
-func dynamicTypeName(val reflect.Value) string {
+// describeXType creates a short description of what kind of parameter
+// this refers to. It will be infered from the return types of Value(),
+// and the type may override this by implementing the types.XTypeDescriber
+// interface.
+func describeXType(val reflect.Value) string {
 	// give the opportunity for the value to describe itself by
-	// implementing the dynamicTypeDescriber interface.
-	tyDescriber := reflect.TypeOf((*types.DynamicTypeDescriber)(nil)).Elem()
+	// implementing the  interface.
+	tyDescriber := reflect.TypeOf((*types.TypeDescriber)(nil)).Elem()
 	if val.Type().AssignableTo(tyDescriber) {
-		return val.Interface().(types.DynamicTypeDescriber).DescribeDynamicType()
+		return val.Interface().(types.TypeDescriber).DescribeType()
 	}
 
 	// use the return type of the Value() method
@@ -54,8 +58,8 @@ func dynamicTypeName(val reflect.Value) string {
 	return valueMethod.Type.Out(0).String()
 }
 
-func toDynamic(val reflect.Value) types.DynamicType {
-	return val.Interface().(types.DynamicType)
+func toXType(val reflect.Value) types.XType {
+	return val.Interface().(types.XType)
 }
 
 func toRedactor(val reflect.Value) types.Redactor {

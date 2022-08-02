@@ -24,8 +24,8 @@ type OneOf struct {
 	}
 }
 
-var _ types.DynamicType = &OneOf{}
-var _ types.DynamicTypeDescriber = &OneOf{}
+var _ types.XType = &OneOf{}
+var _ types.TypeDescriber = &OneOf{}
 
 // UnmarshalParam is a custom parser for a string parameter. This will always
 // run on brand new instance of string, so no synchronization is necessary.
@@ -94,7 +94,7 @@ func (d *OneOf) GetDefaultValue() (string, error) {
 		strings.Join(d.Choices, ", "))
 }
 
-// DescribeDynamicType changes how usage information is shown for parameters
+// DescribeType changes how usage information is shown for parameters
 // of this type. Instead of showing the default:
 //
 //     {paramName}:string
@@ -103,7 +103,7 @@ func (d *OneOf) GetDefaultValue() (string, error) {
 //
 //     {paramName}:(option1|option2|...)
 //
-func (d *OneOf) DescribeDynamicType() string {
+func (d *OneOf) DescribeType() string {
 	return "(" + strings.Join(d.Choices, "|") + ")"
 }
 
