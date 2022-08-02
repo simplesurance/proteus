@@ -5,16 +5,12 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"regexp"
 	"strings"
 
+	"github.com/simplesurance/proteus/internal/consts"
 	"github.com/simplesurance/proteus/specialflags"
 	"github.com/simplesurance/proteus/types"
 )
-
-// ParamNameRE is the regular expression used to valid parameter and parameter
-// set names.
-var ParamNameRE = regexp.MustCompile(`^[a-z][a-z0-9_-]{0,31}$`)
 
 // MustParse reads the parameters into the provided structure reference. The
 // provided parameters struct can be annotated with some parameter tags to
@@ -124,11 +120,11 @@ func mustInferConfigFromValue(value any, opts settings) (config, error) {
 			continue
 		}
 
-		if !ParamNameRE.MatchString(name) {
+		if !consts.ParamNameRE.MatchString(name) {
 			violations = append(violations, types.Violation{
 				Path: member.Path,
 				Message: fmt.Sprintf("Name %q is invalid for parameter or set (valid: %s)",
-					name, ParamNameRE)})
+					name, consts.ParamNameRE)})
 		}
 
 		if tag.paramSet {
@@ -190,12 +186,12 @@ func parseParamSet(setName, setPath string, val reflect.Value) (paramSet, error)
 			continue
 		}
 
-		if !ParamNameRE.MatchString(paramName) {
+		if !consts.ParamNameRE.MatchString(paramName) {
 			violations = append(violations, types.Violation{
 				Path:    member.Path,
 				SetName: setName,
 				Message: fmt.Sprintf("Name %q is invalid for parameter or set (valid: %s)",
-					paramName, ParamNameRE)})
+					paramName, consts.ParamNameRE)})
 		}
 
 		tag.path = member.Path
