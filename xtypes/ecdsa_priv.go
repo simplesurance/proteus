@@ -1,4 +1,4 @@
-package dyntypes
+package xtypes
 
 import (
 	"crypto/ecdsa"
@@ -11,32 +11,32 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// ECDSAPubKey is a dynamic parameter for values of type *ecdsa.PublicKey.
-type ECDSAPubKey struct {
-	DefaultValue  *ecdsa.PublicKey
-	UpdateFn      func(*ecdsa.PublicKey)
+// ECDSAPrivateKey is a dynamic parameter for values of type *ecdsa.PrivateKey.
+type ECDSAPrivateKey struct {
+	DefaultValue  *ecdsa.PrivateKey
+	UpdateFn      func(*ecdsa.PrivateKey)
 	Base64Encoder *base64.Encoding
 	content       struct {
-		value *ecdsa.PublicKey
+		value *ecdsa.PrivateKey
 		mutex sync.Mutex
 	}
 }
 
-var _ types.DynamicType = &ECDSAPubKey{}
+var _ types.DynamicType = &ECDSAPrivateKey{}
 
 // UnmarshalParam parses the input as a string.
-func (d *ECDSAPubKey) UnmarshalParam(in *string) error {
-	var pubK *ecdsa.PublicKey
+func (d *ECDSAPrivateKey) UnmarshalParam(in *string) error {
+	var privK *ecdsa.PrivateKey
 	if in != nil {
 		var err error
-		pubK, err = parseECPubKey(*in, d.Base64Encoder)
+		privK, err = parseECPrivKey(*in, d.Base64Encoder)
 		if err != nil {
 			return err
 		}
 	}
 
 	d.content.mutex.Lock()
-	d.content.value = pubK
+	d.content.value = privK
 	d.content.mutex.Unlock()
 
 	if d.UpdateFn != nil {
@@ -49,7 +49,7 @@ func (d *ECDSAPubKey) UnmarshalParam(in *string) error {
 // Value reads the current updated value, taking the default value into
 // consideration. If the parameter is not marked as optional, this is
 // guaranteed to be not nil.
-func (d *ECDSAPubKey) Value() *ecdsa.PublicKey {
+func (d *ECDSAPrivateKey) Value() *ecdsa.PrivateKey {
 	d.content.mutex.Lock()
 	defer d.content.mutex.Unlock()
 
@@ -62,19 +62,18 @@ func (d *ECDSAPubKey) Value() *ecdsa.PublicKey {
 
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
-func (d *ECDSAPubKey) ValueValid(s string) error {
-	_, err := parseECPubKey(s, d.Base64Encoder)
+func (d *ECDSAPrivateKey) ValueValid(s string) error {
+	_, err := parseECPrivKey(s, d.Base64Encoder)
 	return err
 }
 
 // GetDefaultValue will be used to read the default value when showing usage
 // information.
-func (d *ECDSAPubKey) GetDefaultValue() (string, error) {
-	// FIXME show the public key
+func (d *ECDSAPrivateKey) GetDefaultValue() (string, error) {
 	return "<secret>", nil
 }
 
-func parseECPubKey(v string, base64Enc *base64.Encoding) (*ecdsa.PublicKey, error) {
+func parseECPrivKey(v string, base64Enc *base64.Encoding) (*ecdsa.PrivateKey, error) {
 	var pemData []byte
 
 	// use base64 encoding, if requested
@@ -91,29 +90,37 @@ func parseECPubKey(v string, base64Enc *base64.Encoding) (*ecdsa.PublicKey, erro
 	// parse PEM
 	pemBlock, _ := pem.Decode(pemData)
 	if pemBlock == nil {
-		return nil, fmt.Errorf("invalid PEM encoded public key")
+		return nil, fmt.Errorf("invalid PEM encoding for ECDSA private key")
 	}
 
 	// support PKCS1 or PKCS8 based on PEM header
 	switch pemBlock.Type {
-	case "PUBLIC KEY":
-		var pubK any
-		var err error
-		pubK, err = x509.ParsePKIXPublicKey(pemBlock.Bytes)
+	case "EC PRIVATE KEY":
+		ecPrivK, err := x509.ParseECPrivateKey(pemBlock.Bytes)
 		if err != nil {
-			return nil, fmt.Errorf("error decoding PEM block as ANS.1 public key: %w", err)
+			return nil, fmt.Errorf("error decoding PEM block as PKCS1: %w", err)
 		}
 
-		ecpubK, ok := pubK.(*ecdsa.PublicKey)
+		return ecPrivK, nil
+	case "PRIVATE KEY":
+		var privK any
+		var err error
+		privK, err = x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding PEM block as PKCS8: %w", err)
+		}
+
+		ecPrivK, ok := privK.(*ecdsa.PrivateKey)
 		if !ok {
-			return nil, fmt.Errorf("expected key of type *ecdsa.pubateKey, but got type: %T", pubK)
+			return nil, fmt.Errorf("expected key of type *ecdsa.PrivateKey, but got type: %T", privK)
 		}
 
-		return ecpubK, nil
+		return ecPrivK, nil
 	default:
-		return nil, fmt.Errorf("PEM of type %q is not supported. Expected: %q",
+		return nil, fmt.Errorf("PEM of type %q is not supported. Expected: %q or %q",
 			pemBlock.Type,
-			"PUBLIC KEY")
+			"ECDSA PRIVATE KEY",
+			"PRIVATE KEY")
 	}
 
 }
