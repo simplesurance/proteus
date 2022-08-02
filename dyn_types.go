@@ -8,12 +8,12 @@ import (
 
 const invalidValue = "<invalid>"
 
-// isDynamicType will return true is the type supports hot-reloading the
+// isXType will return true is the type supports hot-reloading the
 // parameter value. This is determine by:
 // - the value belonging to a type that implements the unmarshaller interface
 // - the value belonging to a type that implements a method Value() T, where
 //   the type T any supported value.
-func isDynamicType(ty reflect.Type) bool {
+func isXType(ty reflect.Type) bool {
 	tyUnmarshaler := reflect.TypeOf((*types.DynamicType)(nil)).Elem()
 	if !ty.AssignableTo(tyUnmarshaler) {
 		return false

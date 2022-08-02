@@ -51,8 +51,4 @@ type Parameters map[string]map[string]ParameterInfo
 // can be used by a configuration source.
 type ParameterInfo struct {
 	IsBool bool
-
-	// FlagOnly means that this parameter can only be provided using
-	// command-line flags.
-	FlagOnly bool
 }

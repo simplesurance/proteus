@@ -17,52 +17,6 @@ import (
 	"github.com/simplesurance/proteus/xtypes"
 )
 
-func TestParseFlagSet(t *testing.T) {
-	testWriter := testWriter{t}
-
-	type embeddedConfig struct {
-		EmbParam string
-	}
-
-	testAppCfg := struct {
-		embeddedConfig
-		TestSet struct {
-			embeddedConfig
-			FSValue string `param_desc:"This is a test flag"`
-		} `param:",flagset" param_desc:"This is a test flagset"`
-		DevMode bool
-	}{}
-
-	testSource := cfgtest.New(t, types.ParamValues{
-		"": map[string]string{
-			"devmode":  "true",
-			"embparam": "emb1",
-		},
-		"testset": map[string]string{
-			"fsvalue":  "test value",
-			"embparam": "emb2",
-		},
-	})
-
-	defer testSource.Stop()
-
-	parsed, err := proteus.MustParse(&testAppCfg,
-		proteus.WithSources(testSource),
-		proteus.WithLogger(newTestLogger(t)))
-	if err != nil {
-		t.Logf("Unexpected error parsing configuration: %+v", err)
-		parsed.ErrUsage(testWriter, err)
-		t.FailNow()
-	}
-
-	parsed.Usage(testWriter)
-
-	assert.Equal(t, true, testAppCfg.DevMode)
-	assert.Equal(t, "emb1", testAppCfg.EmbParam)
-	assert.Equal(t, "test value", testAppCfg.TestSet.FSValue)
-	assert.Equal(t, "emb2", testAppCfg.TestSet.EmbParam)
-}
-
 func TestDefaultValueAllTypes(t *testing.T) {
 	testWriter := testWriter{t}
 
@@ -140,6 +94,103 @@ func TestDefaultValueAllTypes(t *testing.T) {
 	assert.Equal(t, "sol", cfg.DynOneOf.Value())
 	assert.Equal(t, true, cfg.DynBool.Value())
 	assert.Equal(t, localhost, cfg.DynURL.Value())
+}
+
+// TestEmbeddingParameters asserts that embedding structs result in the values
+// being flat.
+func TestEmbeddingParameters(t *testing.T) {
+	testWriter := testWriter{t}
+
+	type embeddedConfig struct {
+		EmbParam string
+	}
+
+	testAppCfg := struct {
+		embeddedConfig
+		TestSet struct {
+			embeddedConfig
+			FSValue string
+		}
+		DevMode bool
+	}{}
+
+	testSource := cfgtest.New(t, types.ParamValues{
+		"": map[string]string{
+			"devmode":  "true",
+			"embparam": "emb1",
+		},
+		"testset": map[string]string{
+			"fsvalue":  "test value",
+			"embparam": "emb2",
+		},
+	})
+
+	defer testSource.Stop()
+
+	parsed, err := proteus.MustParse(&testAppCfg,
+		proteus.WithSources(testSource),
+		proteus.WithLogger(newTestLogger(t)))
+	if err != nil {
+		t.Logf("Unexpected error parsing configuration: %+v", err)
+		parsed.ErrUsage(testWriter, err)
+		t.FailNow()
+	}
+
+	parsed.Usage(testWriter)
+
+	assert.Equal(t, true, testAppCfg.DevMode)
+	assert.Equal(t, "emb1", testAppCfg.EmbParam)
+	assert.Equal(t, "test value", testAppCfg.TestSet.FSValue)
+	assert.Equal(t, "emb2", testAppCfg.TestSet.EmbParam)
+}
+
+// TestEmbeddingParamSet asserts that structs including paramsets can be
+// embedded as parameter.
+func TestEmbeddingParamSet(t *testing.T) {
+	testWriter := testWriter{t}
+
+	type httpConfig struct {
+		HTTP struct {
+			IP   string
+			Port uint16
+		}
+	}
+
+	type logConfig struct {
+		Log struct {
+			FileName string
+		}
+	}
+
+	testAppCfg := struct {
+		httpConfig
+		logConfig
+	}{}
+
+	testSource := cfgtest.New(t, types.ParamValues{
+		"http": map[string]string{
+			"ip":   "127.0.0.1",
+			"port": "42",
+		},
+		"log": map[string]string{
+			"filename": "/dev/null",
+		},
+	})
+
+	defer testSource.Stop()
+
+	parsed, err := proteus.MustParse(&testAppCfg,
+		proteus.WithSources(testSource),
+		proteus.WithLogger(newTestLogger(t)))
+	if err != nil {
+		t.Logf("Unexpected error parsing configuration: %+v", err)
+		parsed.ErrUsage(testWriter, err)
+		t.FailNow()
+	}
+
+	assert.Equal(t, "127.0.0.1", testAppCfg.HTTP.IP)
+	assert.EqualValues(t, 42, testAppCfg.HTTP.Port)
+	assert.Equal(t, "/dev/null", testAppCfg.Log.FileName)
 }
 
 func newTestLogger(t *testing.T) proteus.Logger {

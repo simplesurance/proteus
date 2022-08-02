@@ -70,7 +70,7 @@ func (p *Parsed) usage(w io.Writer, err error) {
 		if setName == "" {
 			fmt.Fprintln(&details, "PARAMETERS")
 		} else {
-			fmt.Fprintln(&details, "FLAGSET: "+strings.ToUpper(setName))
+			fmt.Fprintln(&details, "PARAMETER SET: "+strings.ToUpper(setName))
 			if set.desc != "" {
 				fmt.Fprintln(&details, set.desc)
 			}
@@ -124,7 +124,7 @@ func binaryName() string {
 	return "./" + ret
 }
 
-func formatCmdLineParam(cmd string, field flagSetField) string {
+func formatCmdLineParam(cmd string, field paramSetField) string {
 	content := fmt.Sprintf("-%s %s", cmd, field.typ)
 	if field.boolean {
 		content = "-" + cmd
@@ -143,7 +143,7 @@ func (p *Parsed) Dump(w io.Writer) {
 	merged := p.mergeValues()
 	for _, setName := range mapKeysSorted(merged) {
 		if setName != "" {
-			fmt.Fprintf(w, "\nFLAGSET %s:\n", strings.ToUpper(setName))
+			fmt.Fprintf(w, "\nPARAMETER SET %s:\n", strings.ToUpper(setName))
 		}
 
 		set := merged[setName]
