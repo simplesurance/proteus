@@ -63,7 +63,7 @@ func (u *updater) validateValues(v types.ParamValues) {
 func (u *updater) mustBeOnValidIDs(v types.ParamValues) {
 	for setName, set := range v {
 		if _, ok := u.parsed.inferedConfig[setName]; !ok {
-			panic(fmt.Errorf("parameter source is providing value for unsolicited flagset %q", setName))
+			panic(fmt.Errorf("parameter source is providing value for unsolicited paramset %q", setName))
 		}
 
 		for paramName := range set {

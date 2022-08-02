@@ -58,12 +58,6 @@ func (r *source) Watch(
 	return parse(updater.Log, r.prefix+"__", paramIDs)
 }
 
-// parse will parse the environment variables and return them. Boolean flags
-// require special handling, and for this reason one of the input parameters
-// is a function that must tells if a parameter is boolean or not.
-//
-// See package documentation for details about the expected structure for the
-// flags.
 func parse(
 	logger func(string),
 	prefix string,

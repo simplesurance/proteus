@@ -12,23 +12,27 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// ParamNameRE is the regular expression used to valid parameter and flagset
-// names.
+// ParamNameRE is the regular expression used to valid parameter and parameter
+// set names.
 var ParamNameRE = regexp.MustCompile(`^[a-z][a-z0-9_-]{0,31}$`)
 
-// MustParse creates a new parser for configuration. It panics if there is
-// a coding error. If no coding error is found, the parameters are parsed
-// from the provided sources and made available on "flags". If the
-// parameters are invalid and error is returned. Parsed is always returned,
-// and can be used to get details about the violation that caused the
-// parameter parsing to fail.
-func MustParse(flags any, options ...Option) (*Parsed, error) {
+// MustParse reads the parameters into the provided structure reference. The
+// provided parameters struct can be annotated with some parameter tags to
+// configure how the configuration is read.
+//
+// There are support for sub-parameters and for getting updates about
+// changes in value without the need to restart the application. See godoc
+// examples for usage.
+//
+// A Parsed object is guaranteed to be always returned, even in case of error,
+// allowing to get usage information.
+func MustParse(parameters any, options ...Option) (*Parsed, error) {
 	opts := settings{
 		loggerFn: func(msg string, depth int) {}, // nop logger
 	}
 	opts.apply(options...)
 
-	appConfig, err := mustInferConfigFromValue(flags, opts)
+	appConfig, err := mustInferConfigFromValue(parameters, opts)
 	if err != nil {
 		panic(fmt.Errorf("INVALID CONFIGURATION STRUCT: %v", err))
 	}
@@ -87,12 +91,13 @@ func mustInferConfigFromValue(value any, opts settings) (config, error) {
 
 	val = val.Elem()
 
-	ret := config{"": flagSet{fields: map[string]flagSetField{}}}
+	ret := config{"": paramSet{fields: map[string]paramSetField{}}}
 
 	// each member of the configuration struct can be either:
+	// - parameter: meaning that values must be loaded into it
+	// - set of parameters: meaning that is a structure that contains more
+	//   parameter.
 	// - ignored: identified with: param:"-"
-	// - parameter set: meaning that is a structure that contains more
-	//   parameter. This is identified by: param:",flagset"
 	members, err := flatWalk("", "", val)
 	if err != nil {
 		return nil, fmt.Errorf("walking root fields of the configuration struct: %w", err)
@@ -126,7 +131,7 @@ func mustInferConfigFromValue(value any, opts settings) (config, error) {
 					name, ParamNameRE)})
 		}
 
-		if tag.flagSet {
+		if tag.paramSet {
 			// is a set or parameters
 			d, err := parseParamSet(name, member.Path, member.value)
 			if err != nil {
@@ -160,14 +165,14 @@ func mustInferConfigFromValue(value any, opts settings) (config, error) {
 	return ret, nil
 }
 
-func parseParamSet(setName, setPath string, val reflect.Value) (flagSet, error) {
+func parseParamSet(setName, setPath string, val reflect.Value) (paramSet, error) {
 	members, err := flatWalk(setName, setPath, val)
 	if err != nil {
-		return flagSet{}, err
+		return paramSet{}, err
 	}
 
-	ret := flagSet{
-		fields: make(map[string]flagSetField, len(members)),
+	ret := paramSet{
+		fields: make(map[string]paramSetField, len(members)),
 	}
 
 	violations := types.ErrViolations{}
@@ -181,7 +186,7 @@ func parseParamSet(setName, setPath string, val reflect.Value) (flagSet, error) 
 			continue
 		}
 
-		if paramName == "-" || tag.flagSet {
+		if paramName == "-" || tag.paramSet {
 			continue
 		}
 
@@ -206,14 +211,14 @@ func parseParamSet(setName, setPath string, val reflect.Value) (flagSet, error) 
 
 func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 	paramName string,
-	_ flagSetField,
+	_ paramSetField,
 	_ error,
 ) {
 	tagParam := structField.Tag.Get("param")
 	tagParamParts := strings.Split(tagParam, ",")
 	paramName = tagParamParts[0]
 
-	ret := flagSetField{
+	ret := paramSetField{
 		typ:  describeType(fieldVal),
 		desc: structField.Tag.Get("param_desc"),
 	}
@@ -224,8 +229,6 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 			ret.optional = true
 		case "secret":
 			ret.secret = true
-		case "flagset":
-			ret.flagSet = true
 		default:
 			return paramName, ret, fmt.Errorf(
 				"option '%s' is invalid for tag 'param' in '%s'",
@@ -241,7 +244,14 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 		paramName = strings.ToLower(structField.Name)
 	}
 
-	if isDynamicType(structField.Type) {
+	// try to configure it as a "basic type"
+	err := configStandardCallbacks(&ret, fieldVal)
+	if err == nil {
+		return paramName, ret, nil
+	}
+
+	// try to configure it as an "xtype"
+	if isXType(structField.Type) {
 		if fieldVal.IsNil() {
 			fieldVal.Set(reflect.New(fieldVal.Type().Elem()))
 		}
@@ -251,27 +261,34 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 		ret.validFn = toDynamic(fieldVal).ValueValid
 		ret.setValueFn = toDynamic(fieldVal).UnmarshalParam
 		ret.getDefaultFn = toDynamic(fieldVal).GetDefaultValue
+
+		// some types know how to redact themselves (for example,
+		// xtype.URL know how to redact the password)
 		if redactor := toRedactor(fieldVal); redactor != nil {
 			ret.redactFn = redactor.RedactValue
 		} else {
 			ret.redactFn = func(s string) string { return s }
 		}
 
-	} else if !ret.flagSet {
-		err := configStandardCallbacks(&ret, fieldVal)
-		if err != nil {
-			return paramName, ret, err
-		}
-	} else {
-		// callbacks are not expected to be called on flagsets
-		msg := fmt.Sprintf("%q is a flagset, it have no value", paramName)
-		ret.validFn = func(v string) error { panic(msg) }
-		ret.setValueFn = func(v *string) error { panic(msg) }
-		ret.getDefaultFn = func() (string, error) { panic(msg) }
-		ret.redactFn = func(s string) string { panic(msg) }
+		return paramName, ret, nil
 	}
 
-	return paramName, ret, nil
+	// if is a struct, assume it to be a parameter set
+	if fieldVal.Kind() == reflect.Struct {
+		ret.paramSet = true
+
+		// parameter sets have no value, and the callback functions should
+		// not be called; install handlers to help debug in case of a mistake.
+		panicMessage := fmt.Sprintf("%q is a paramset, it have no value", paramName)
+		ret.validFn = func(v string) error { panic(panicMessage) }
+		ret.setValueFn = func(v *string) error { panic(panicMessage) }
+		ret.getDefaultFn = func() (string, error) { panic(panicMessage) }
+		ret.redactFn = func(s string) string { panic(panicMessage) }
+
+		return paramName, ret, nil
+	}
+
+	return paramName, ret, fmt.Errorf("struct member %q is unsupported", paramName)
 }
 
 func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
@@ -286,7 +303,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 			})
 		}
 
-		appConfig[""].fields[specialflags.Help.Name] = flagSetField{
+		appConfig[""].fields[specialflags.Help.Name] = paramSetField{
 			typ:      "bool",
 			optional: true,
 			desc:     specialflags.Help.Description,
@@ -330,7 +347,7 @@ func panicOnNil(v *string) {
 
 func describeType(val reflect.Value) string {
 	t := val.Type()
-	if isDynamicType(t) {
+	if isXType(t) {
 		return dynamicTypeName(val)
 	}
 

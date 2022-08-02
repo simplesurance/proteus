@@ -49,7 +49,7 @@ type Violation struct {
 	// struct.
 	Path string
 
-	// SetName is the name of the flagset with a violation.
+	// SetName is the name of the paramset with a violation.
 	SetName string
 
 	// ParamName is the name of the configuration parameter affected

@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func configStandardCallbacks(fieldData *flagSetField, val reflect.Value) error {
+func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error {
 	// the redact function is to allow redacting part of a value, like
 	// redacting the "password" part of an URL. For basic types use
 	// the identity function.
@@ -91,7 +91,7 @@ func configStandardCallbacks(fieldData *flagSetField, val reflect.Value) error {
 
 }
 
-func configAsInt(fieldData *flagSetField, val reflect.Value, bitSize int) {
+func configAsInt(fieldData *paramSetField, val reflect.Value, bitSize int) {
 	fieldData.validFn = func(str string) error {
 		_, err := strconv.ParseInt(str, 10, bitSize)
 		return err
@@ -113,7 +113,7 @@ func configAsInt(fieldData *flagSetField, val reflect.Value, bitSize int) {
 	}
 }
 
-func configAsUint(fieldData *flagSetField, val reflect.Value, bitSize int) {
+func configAsUint(fieldData *paramSetField, val reflect.Value, bitSize int) {
 	fieldData.validFn = func(str string) error {
 		_, err := strconv.ParseUint(str, 10, bitSize)
 		return err

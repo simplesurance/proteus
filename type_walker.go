@@ -15,7 +15,7 @@ func flatWalk(setName, setPath string, val reflect.Value) (map[string]fieldAndVa
 		return nil, types.ErrViolations([]types.Violation{
 			{
 				SetName: setName,
-				Message: "only structs can be flagsets",
+				Message: "only structs can be paramsets",
 			},
 		})
 	}
