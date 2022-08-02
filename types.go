@@ -5,7 +5,7 @@ import (
 	"github.com/simplesurance/proteus/specialflags"
 )
 
-type config map[string]flagSet
+type config map[string]paramSet
 
 // configIDs create configuration information that can be used by a
 // configuration source.
@@ -30,16 +30,16 @@ func (c config) configIDs() sources.Parameters {
 	return ret
 }
 
-type flagSet struct {
+type paramSet struct {
 	desc   string
-	fields map[string]flagSetField
+	fields map[string]paramSetField
 }
 
-type flagSetField struct {
+type paramSetField struct {
 	typ      string
 	optional bool
 	secret   bool
-	flagSet  bool
+	paramSet bool
 	desc     string
 	boolean  bool
 	path     string
@@ -51,7 +51,7 @@ type flagSetField struct {
 	redactFn     func(string) string
 }
 
-func (f flagSetField) redactedValue(v *string) func() string {
+func (f paramSetField) redactedValue(v *string) func() string {
 	return func() string {
 		if f.secret {
 			return redactedPlaceholder
@@ -65,7 +65,7 @@ func (f flagSetField) redactedValue(v *string) func() string {
 	}
 }
 
-func (f flagSetField) redactedDefaultValue() string {
+func (f paramSetField) redactedDefaultValue() string {
 	if f.secret {
 		return redactedPlaceholder
 	}
