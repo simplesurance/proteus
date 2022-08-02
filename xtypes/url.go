@@ -8,7 +8,7 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// URL is a dynamic parameter for values of type *url.URL.
+// URL is a xtype for values of type *url.URL.
 type URL struct {
 	DefaultValue *url.URL
 	UpdateFn     func(*url.URL)
@@ -19,7 +19,7 @@ type URL struct {
 	}
 }
 
-var _ types.DynamicType = &URL{}
+var _ types.XType = &URL{}
 var _ types.Redactor = &URL{}
 
 // UnmarshalParam parses the input as a string.

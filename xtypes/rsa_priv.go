@@ -8,12 +8,13 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/simplesurance/proteus/internal/consts"
 	"github.com/simplesurance/proteus/types"
 )
 
-// RSAPrivateKey is a dynamic parameter for values of type *rsa.PrivateKey. The
+// RSAPrivateKey is a xtype for values of type *rsa.PrivateKey. The
 // key format is expected to be on PKGCS8/PEM format, optionally base64
-// encoded.
+// encoded. The full value is fully redacted to avoid leaking secrets.
 type RSAPrivateKey struct {
 	DefaultValue  *rsa.PrivateKey
 	UpdateFn      func(*rsa.PrivateKey)
@@ -24,7 +25,8 @@ type RSAPrivateKey struct {
 	}
 }
 
-var _ types.DynamicType = &RSAPrivateKey{}
+var _ types.XType = &RSAPrivateKey{}
+var _ types.Redactor = &RSAPrivateKey{}
 
 // UnmarshalParam parses the input as a string.
 func (d *RSAPrivateKey) UnmarshalParam(in *string) error {
@@ -73,6 +75,11 @@ func (d *RSAPrivateKey) ValueValid(s string) error {
 // information.
 func (d *RSAPrivateKey) GetDefaultValue() (string, error) {
 	return "<secret>", nil
+}
+
+// RedactValue fully redacts the secret to avoid leaking it.
+func (d *RSAPrivateKey) RedactValue(string) string {
+	return consts.RedactedPlaceholder
 }
 
 func parseRSAPriv(v string, base64Enc *base64.Encoding) (*rsa.PrivateKey, error) {

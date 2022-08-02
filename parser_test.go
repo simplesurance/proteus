@@ -25,22 +25,22 @@ func TestDefaultValueAllTypes(t *testing.T) {
 	localhost, _ := url.Parse("https://localhost")
 
 	cfg := struct {
-		Str        string                `param:",optional"`
-		I          int                   `param:",optional"`
-		I8         int8                  `param:",optional"`
-		I16        int16                 `param:",optional"`
-		I32        int32                 `param:",optional"`
-		I64        int64                 `param:",optional"`
-		UI8        uint8                 `param:",optional"`
-		UI16       uint16                `param:",optional"`
-		UI32       uint32                `param:",optional"`
-		UI64       uint64                `param:",optional"`
-		Bool       bool                  `param:",optional"`
-		DynStr     *xtypes.String        `param:",optional"`
-		DynBool    *xtypes.Bool          `param:",optional"`
-		DynOneOf   *xtypes.OneOf         `param:",optional"`
-		DynURL     *xtypes.URL           `param:",optional"`
-		DynRSAPriv *xtypes.RSAPrivateKey `param:",optional"`
+		Str      string                `param:",optional"`
+		I        int                   `param:",optional"`
+		I8       int8                  `param:",optional"`
+		I16      int16                 `param:",optional"`
+		I32      int32                 `param:",optional"`
+		I64      int64                 `param:",optional"`
+		UI8      uint8                 `param:",optional"`
+		UI16     uint16                `param:",optional"`
+		UI32     uint32                `param:",optional"`
+		UI64     uint64                `param:",optional"`
+		Bool     bool                  `param:",optional"`
+		XStr     *xtypes.String        `param:",optional"`
+		XBool    *xtypes.Bool          `param:",optional"`
+		XOneOf   *xtypes.OneOf         `param:",optional"`
+		XURL     *xtypes.URL           `param:",optional"`
+		XRSAPriv *xtypes.RSAPrivateKey `param:",optional"`
 	}{
 		Str:  "str",
 		I:    math.MinInt,
@@ -53,17 +53,17 @@ func TestDefaultValueAllTypes(t *testing.T) {
 		UI32: math.MaxUint32,
 		UI64: math.MaxUint64,
 		Bool: true,
-		DynStr: &xtypes.String{
+		XStr: &xtypes.String{
 			DefaultValue: "def dyn",
 		},
-		DynBool: &xtypes.Bool{
+		XBool: &xtypes.Bool{
 			DefaultValue: true,
 		},
-		DynOneOf: &xtypes.OneOf{
+		XOneOf: &xtypes.OneOf{
 			DefaultValue: "sol",
 			Choices:      []string{"do", "re", "mi", "fa", "sol", "la", "si"},
 		},
-		DynURL: &xtypes.URL{
+		XURL: &xtypes.URL{
 			DefaultValue: localhost,
 		},
 	}
@@ -90,10 +90,10 @@ func TestDefaultValueAllTypes(t *testing.T) {
 	assert.Equal(t, cfg.UI32, uint32(math.MaxUint32))
 	assert.Equal(t, cfg.UI64, uint64(math.MaxUint64))
 	assert.Equal(t, true, cfg.Bool)
-	assert.Equal(t, "def dyn", cfg.DynStr.Value())
-	assert.Equal(t, "sol", cfg.DynOneOf.Value())
-	assert.Equal(t, true, cfg.DynBool.Value())
-	assert.Equal(t, localhost, cfg.DynURL.Value())
+	assert.Equal(t, "def dyn", cfg.XStr.Value())
+	assert.Equal(t, "sol", cfg.XOneOf.Value())
+	assert.Equal(t, true, cfg.XBool.Value())
+	assert.Equal(t, localhost, cfg.XURL.Value())
 }
 
 // TestEmbeddingParameters asserts that embedding structs result in the values

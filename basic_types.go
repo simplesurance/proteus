@@ -12,7 +12,7 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 	// the identity function.
 	fieldData.redactFn = func(s string) string { return s }
 
-	// non-dynamic values are either left alone with whatever value they
+	// non-xtype values are either left alone with whatever value they
 	// had initially, or written once, with a value provided by a
 	// configuration source.
 	switch val.Type().Kind() {
@@ -132,5 +132,11 @@ func configAsUint(fieldData *paramSetField, val reflect.Value, bitSize int) {
 
 	fieldData.getDefaultFn = func() (string, error) {
 		return strconv.FormatUint(val.Uint(), 10), nil
+	}
+}
+
+func panicOnNil(v *string) {
+	if v == nil {
+		panic("bug: tried to set non-xtype parameter to nil")
 	}
 }

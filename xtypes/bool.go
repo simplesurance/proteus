@@ -19,7 +19,7 @@ type Bool struct {
 	}
 }
 
-var _ types.DynamicType = &Bool{}
+var _ types.XType = &Bool{}
 
 // UnmarshalParam parses the input as a boolean.
 func (d *Bool) UnmarshalParam(in *string) error {

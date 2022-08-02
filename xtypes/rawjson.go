@@ -7,7 +7,7 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// RawJSON is a dynamic parameter for raw json messages.
+// RawJSON is a xtype for raw json messages.
 type RawJSON struct {
 	DefaultValue json.RawMessage
 	UpdateFn     func(*json.RawMessage)
@@ -17,7 +17,7 @@ type RawJSON struct {
 	}
 }
 
-var _ types.DynamicType = &RawJSON{}
+var _ types.XType = &RawJSON{}
 
 // UnmarshalParam parses the input as a string.
 func (d *RawJSON) UnmarshalParam(in *string) error {

@@ -308,17 +308,17 @@ func (p *Parsed) refresh(force bool) {
 
 	for setName, set := range p.inferedConfig {
 		for paramName, paramConfig := range set.fields {
-			if !paramConfig.isDynamic && !force {
+			if !paramConfig.isXtype && !force {
 				p.settings.loggerFn(fmt.Sprintf("Not updating %s.%s", setName, paramName), 1)
 			}
 
 			value := p.desiredValue(setName, paramName)
 
-			if !paramConfig.isDynamic && value == nil {
+			if !paramConfig.isXtype && value == nil {
 				// value=nil represents the default value. For
-				// non-dynamic the approach is not touching
+				// non-xtype the approach is not touching
 				// whatever value is already present on the
-				// configuration struct. For dynamic values
+				// configuration struct. For xtype values
 				// only we may set the value to something, then
 				// revert it back to the default value.
 				continue
