@@ -41,7 +41,8 @@ type Redactor interface {
 
 // DynamicTypeDescriber describes what kind of value must be provided by
 // a configuration parameter. Implementation is optional, and should only
-// be done when the default generated usage information is not appropriated.
+// be implemented when the default generated usage information is not
+// appropriated.
 type DynamicTypeDescriber interface {
 	DescribeDynamicType() string
 }

@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/simplesurance/proteus"
-	"github.com/simplesurance/proteus/dyntypes"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
+	"github.com/simplesurance/proteus/xtypes"
 )
 
 func TestParseFlagSet(t *testing.T) {
@@ -71,22 +71,22 @@ func TestDefaultValueAllTypes(t *testing.T) {
 	localhost, _ := url.Parse("https://localhost")
 
 	cfg := struct {
-		Str        string                  `param:",optional"`
-		I          int                     `param:",optional"`
-		I8         int8                    `param:",optional"`
-		I16        int16                   `param:",optional"`
-		I32        int32                   `param:",optional"`
-		I64        int64                   `param:",optional"`
-		UI8        uint8                   `param:",optional"`
-		UI16       uint16                  `param:",optional"`
-		UI32       uint32                  `param:",optional"`
-		UI64       uint64                  `param:",optional"`
-		Bool       bool                    `param:",optional"`
-		DynStr     *dyntypes.String        `param:",optional"`
-		DynBool    *dyntypes.Bool          `param:",optional"`
-		DynOneOf   *dyntypes.OneOf         `param:",optional"`
-		DynURL     *dyntypes.URL           `param:",optional"`
-		DynRSAPriv *dyntypes.RSAPrivateKey `param:",optional"`
+		Str        string                `param:",optional"`
+		I          int                   `param:",optional"`
+		I8         int8                  `param:",optional"`
+		I16        int16                 `param:",optional"`
+		I32        int32                 `param:",optional"`
+		I64        int64                 `param:",optional"`
+		UI8        uint8                 `param:",optional"`
+		UI16       uint16                `param:",optional"`
+		UI32       uint32                `param:",optional"`
+		UI64       uint64                `param:",optional"`
+		Bool       bool                  `param:",optional"`
+		DynStr     *xtypes.String        `param:",optional"`
+		DynBool    *xtypes.Bool          `param:",optional"`
+		DynOneOf   *xtypes.OneOf         `param:",optional"`
+		DynURL     *xtypes.URL           `param:",optional"`
+		DynRSAPriv *xtypes.RSAPrivateKey `param:",optional"`
 	}{
 		Str:  "str",
 		I:    math.MinInt,
@@ -99,17 +99,17 @@ func TestDefaultValueAllTypes(t *testing.T) {
 		UI32: math.MaxUint32,
 		UI64: math.MaxUint64,
 		Bool: true,
-		DynStr: &dyntypes.String{
+		DynStr: &xtypes.String{
 			DefaultValue: "def dyn",
 		},
-		DynBool: &dyntypes.Bool{
+		DynBool: &xtypes.Bool{
 			DefaultValue: true,
 		},
-		DynOneOf: &dyntypes.OneOf{
+		DynOneOf: &xtypes.OneOf{
 			DefaultValue: "sol",
 			Choices:      []string{"do", "re", "mi", "fa", "sol", "la", "si"},
 		},
-		DynURL: &dyntypes.URL{
+		DynURL: &xtypes.URL{
 			DefaultValue: localhost,
 		},
 	}

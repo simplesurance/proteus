@@ -1,4 +1,4 @@
-package dyntypes
+package xtypes
 
 import (
 	"crypto/rsa"
