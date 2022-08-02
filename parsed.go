@@ -178,7 +178,7 @@ func (p *Parsed) Valid() error {
 func (p *Parsed) valid() error {
 	mergedValues := p.mergeValues()
 
-	violations := ErrViolations{}
+	violations := types.ErrViolations{}
 	for setName, set := range p.inferedConfig {
 		for paramName, paramConfig := range set.fields {
 			// must validate when a value is present and when it
@@ -191,13 +191,13 @@ func (p *Parsed) valid() error {
 			}
 
 			if err := p.validValue(setName, paramName, value); err != nil {
-				var validViol ErrViolations
+				var validViol types.ErrViolations
 				if errors.As(err, &validViol) {
 					violations = append(violations, validViol...)
 					continue
 				}
 
-				violations = append(violations, Violation{
+				violations = append(violations, types.Violation{
 					SetName:   setName,
 					ParamName: paramName,
 					ValueFn:   paramConfig.redactedValue(value),
@@ -265,7 +265,7 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 
 	if value == nil {
 		if !param.optional {
-			return ErrViolations([]Violation{
+			return types.ErrViolations([]types.Violation{
 				{
 					SetName:   setName,
 					ParamName: paramName,
@@ -280,7 +280,7 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 
 	err := param.validFn(*value)
 	if err != nil {
-		return ErrViolations([]Violation{
+		return types.ErrViolations([]types.Violation{
 			{
 				SetName:   setName,
 				ParamName: paramName,
