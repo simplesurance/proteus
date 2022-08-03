@@ -192,4 +192,84 @@ func main() {
 }
 ```
 
+### Auto-Generated Usage (a.k.a --help)
+
+To have usage information include the `WithAutoUsage` option:
+
+```go
+func main() {
+	params := struct {
+		Database    dbParams
+		Environment *xtypes.OneOf `param_desc:"What environment the app is running on"`
+		Port        uint16
+	}{
+		Database: defaultDBParams(),
+		Environment: &xtypes.OneOf{
+			Choices: []string{"dev", "stg", "prd"},
+		},
+	}
+
+	parsed, err := proteus.MustParse(&params,
+		proteus.WithAutoUsage(os.Stderr, "Demo App", func() { os.Exit(0) }),
+		proteus.WithSources(
+			cfgflags.New(),
+			cfgenv.New("CFG"),
+		))
+	if err != nil {
+		parsed.ErrUsage(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Running in %s mode\n", params.Environment.Value())
+}
+
+type dbParams struct {
+	Server   string `param:",optional"    param_desc:"Name of the database server"`
+	Port     uint16 `param:",optional"    param_desc:"TCP port number of database server"`
+	User     string `                     param_desc:"Username for authentication"`
+	Password string `                     param_desc:"Password for authentication"`
+}
+
+func defaultDBParams() dbParams {
+	return dbParams{
+		Server: "localhost",
+		Port:   5432,
+	}
+}
+```
+
+```bash
+go run main.go --help
+
+# Output:
+# Demo App
+# Syntax:
+# ./main \
+#     <-environment (dev|stg|prd)> \
+#     <-port uint16> \
+#     [-help] \
+#   database \
+#     <-password string> \
+#     <-user string> \
+#     [-port uint16] \
+#     [-server string]
+# 
+# PARAMETERS
+# - environment:(dev|stg|prd)
+#   What environment the app is running on
+# - port:uint16
+# - help:bool default=false
+#   Display usage instructions
+# 
+# PARAMETER SET: DATABASE
+# - password:string
+#   Password for authentication
+# - user:string
+#   Username for authentication
+# - port:uint16 default=5432
+#   TCP port number of database server
+# - server:string default=localhost
+#   Name of the database server
+```
+
 // TODO: Document `Dump()`, `Usage()` and `ErrUsage()`.
