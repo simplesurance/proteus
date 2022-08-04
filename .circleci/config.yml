@@ -1,0 +1,69 @@
+# Golang CircleCI 2.0 configuration file
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2.1
+
+parameters:
+  go-version:
+    type: string
+    default: "1.18"
+
+jobs:
+  test_linux:
+    docker:
+      - image: cimg/go:<< pipeline.parameters.go-version >>
+        environment:
+          GOFLAGS: -mod=vendor
+          TEST_RESULTS: /tmp/test-results
+
+    working_directory: ~/proteus
+    steps:
+      - checkout
+
+      - run:
+          name: Preparing Test Environment
+          command: |
+            GO111MODULE=off go get github.com/jstemmer/go-junit-report
+            mkdir -p ${TEST_RESULTS}
+
+      - run:
+          name: Run Tests
+          command: |
+            git config --global user.email "circleci-proteustest@example.com"
+            git config --global user.name "proteus"
+            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+            go test -race -v -test.timeout 1m ./... | tee ${TEST_RESULTS}/go-test.out
+
+      - store_test_results:
+          path: /tmp/test-results
+
+  build_linux:
+    docker:
+      - image: cimg/go:<< pipeline.parameters.go-version >>
+
+    working_directory: ~/proteus
+    steps:
+      - checkout
+
+      - run:
+          name: Building proteus
+          command: make proteus
+
+  static_analysis_linux:
+    docker:
+      - image: golangci/golangci-lint:v1.45.1
+
+    working_directory: ~/proteus
+    steps:
+      - checkout
+
+      - run:
+          name: Running Static Code Analysis
+          command: golangci-lint run
+
+workflows:
+  version: 2.1
+  workflow:
+    jobs:
+      - build_linux
+      - test_linux
+      - static_analysis_linux
