@@ -12,23 +12,22 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// MustParse reads the parameters into the provided structure reference. The
-// provided parameters struct can be annotated with some parameter tags to
-// configure how the configuration is read.
+// MustParse receives on "config" a struct that defines the expected
+// application parameters and loads the parameters values into it.
 //
-// There are support for sub-parameters and for getting updates about
+// There is support for sub-parameters and for getting updates about
 // changes in value without the need to restart the application. See godoc
 // examples for usage.
 //
 // A Parsed object is guaranteed to be always returned, even in case of error,
-// allowing to get usage information.
-func MustParse(parameters any, options ...Option) (*Parsed, error) {
+// allowing the creation of useful error messages.
+func MustParse(config any, options ...Option) (*Parsed, error) {
 	opts := settings{
 		loggerFn: func(msg string, depth int) {}, // nop logger
 	}
 	opts.apply(options...)
 
-	appConfig, err := mustInferConfigFromValue(parameters, opts)
+	appConfig, err := mustInferConfigFromValue(config, opts)
 	if err != nil {
 		panic(fmt.Errorf("INVALID CONFIGURATION STRUCT: %v", err))
 	}

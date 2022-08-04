@@ -30,7 +30,7 @@ func (p *Parsed) Usage(w io.Writer) {
 }
 
 // ErrUsage is a specialized version of Usage(), that is intended
-// to be used when the wrong parameters where provided to the application, and
+// to be used when parsing the configuration failed and
 // will show to the user what is wrong with the provided parameters.
 // It does not terminate the application.
 func (p *Parsed) ErrUsage(w io.Writer, err error) {
@@ -165,7 +165,7 @@ func mapKeysSorted[T any](v map[string]T) []string {
 	return ret
 }
 
-// Valid returns true if the parameters passed validation, or false otherwise.
+// Valid allows determining if the provided application parameters are valid.
 func (p *Parsed) Valid() error {
 	p.valuesMutex.Lock()
 	defer p.valuesMutex.Unlock()
