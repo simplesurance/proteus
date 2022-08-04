@@ -1,13 +1,15 @@
 # Proteus
 
 ## About
-Proteus is a library for structured dynamic configuration for go service. It
-can be used to specify parameters a go service needs, and the parameters can
-be provided as command-line flags or environment variables. Parameter can be
-updated without restarting the application.
+
+Proteus is a package for defining the configuration of an Go application in a
+struct and loading it from different sources. Application can also opt-in to
+getting updates when the configuration changes.
 
 ## Project Status
-This project is in pre-release stage and backwards compatibility is not guaranteed.
+
+This project is in pre-release stage and backwards compatibility is not
+guaranteed.
 
 ## How to Use
 
@@ -42,12 +44,12 @@ CFG__SERVER=b CFG__PORT=42 go run *.go
 ```
 
 When the same parameter is provided by two providers, the one listed first
-has priority.
+in `proteus.WithSources()` has priority.
 
 ### Sets of Parameters
-Parameters can be namespaces into _sets_ of parameters. This allows using
-simple names like _server_ for parameters in one namespace without clashing
-with a parameter on other namespace.
+
+Parameters can be organized in _parameter sets_. Two parameters with the same
+name can exist, as long as they belong to different sets.
 
 ```go
 package main
@@ -108,8 +110,8 @@ CFG__DB__SERVER=localhost go run *.go \
 # Starting HTTP server on :5432
 ```
 
-Note that one parameter was provided by environment variable and the others
-with command-line flags.
+Note that one parameter was provided as environment variable and the others
+as command-line flags.
 
 ### Struct Tags and Defaults
 
