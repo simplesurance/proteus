@@ -44,16 +44,6 @@ func WithAutoUsage(writer io.Writer, headline string, exitFn func()) Option {
 	}
 }
 
-// WithAutoDryMode will parse the `--dry-mode` command-line flag. If it is
-// present will parse and validate all parameters and return with status
-// 0 or 1, depending on the parameters being valid or not. The callback
-// function MUST terminate the process.
-func WithAutoDryMode(exitFn func(parsed *Parsed)) Option {
-	return func(p *settings) {
-		// FIXME: implement
-	}
-}
-
 // WithLogger allows providing a custom logger. By default logs are suppressed.
 func WithLogger(l Logger) Option {
 	return func(p *settings) {
@@ -63,5 +53,6 @@ func WithLogger(l Logger) Option {
 
 // Logger is the function used to output human-readable diagnostics
 // information. Depth can optionally be used to determine the real caller of
-// the log function, by skipping the correct number intermediate frames.
+// the log function, by skipping the correct number of intermediate frames
+// in the stacktrace.
 type Logger func(msg string, depth int)

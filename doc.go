@@ -1,5 +1,4 @@
-// Package proteus is a library structured dynamic app configuration in go.
-//
-// Configuration can be read from multiple sources, and it supports getting
-// updates about changed parameters without restarting the application.
+// Package proteus is a package for defining the configuration of an Go
+// application in a struct and loading it from different sources. Application
+// can also opt-in to getting updates when the configuration changes.
 package proteus
