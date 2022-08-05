@@ -1,4 +1,5 @@
-// Package cfgtest implements a configuration reader that can be used in tests.
+// Package cfgtest is a configuration source that allow tests to provide
+// parameter values.
 package cfgtest
 
 import (
@@ -37,7 +38,7 @@ func (r *TestSource) Update(setid, id string, value string) {
 	r.updater.Update(r.values)
 }
 
-// Stop releases any resource being used by the TestSource.
+// Stop does nothing.
 func (r *TestSource) Stop() {
 }
 
