@@ -29,9 +29,6 @@ func (u *updater) Log(msg string) {
 	u.parsed.settings.loggerFn(u.providerName+": "+msg, 2)
 }
 
-func (u *updater) UseSpecialParameters() {
-}
-
 func (u *updater) update(v types.ParamValues, refresh bool) {
 	u.mustBeOnValidIDs(v)
 	u.validateValues(v)

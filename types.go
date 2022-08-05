@@ -1,8 +1,8 @@
 package proteus
 
 import (
+	"github.com/simplesurance/proteus/internal/specialflags"
 	"github.com/simplesurance/proteus/sources"
-	"github.com/simplesurance/proteus/specialflags"
 )
 
 type config map[string]paramSet

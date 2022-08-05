@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/simplesurance/proteus/internal/consts"
-	"github.com/simplesurance/proteus/specialflags"
+	"github.com/simplesurance/proteus/internal/specialflags"
 	"github.com/simplesurance/proteus/types"
 )
 
