@@ -1,5 +1,4 @@
-// Package cfgtest is a configuration source that allow tests to provide
-// parameter values.
+// Package cfgtest is a configuration source to be used on tests.
 package cfgtest
 
 import (
