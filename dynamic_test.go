@@ -44,7 +44,7 @@ func TestDynamic(t *testing.T) {
 		},
 	}
 
-	source := cfgtest.New(t, types.ParamValues{
+	source := cfgtest.New(types.ParamValues{
 		"": map[string]string{"x": wantedValues[0]},
 	})
 

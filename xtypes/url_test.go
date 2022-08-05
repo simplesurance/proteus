@@ -30,7 +30,7 @@ func TestSimpleURL(t *testing.T) {
 		},
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(t, source)))
+	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
 	require.NoError(t, err)
 
 	buffer := bytes.Buffer{}
@@ -58,7 +58,7 @@ func TestDefaultURL(t *testing.T) {
 		"": map[string]string{},
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(t, source)))
+	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
 	require.NoError(t, err)
 
 	buffer := bytes.Buffer{}
@@ -83,7 +83,7 @@ func TestEmptyURL(t *testing.T) {
 		"": map[string]string{"url": ""},
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(t, source)))
+	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
 	require.NoError(t, err)
 
 	buffer := bytes.Buffer{}
@@ -139,7 +139,7 @@ func TestCustomValidator(t *testing.T) {
 				},
 			}
 
-			parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(t, source)))
+			parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
 
 			// parsed is always not-null to allow querying the
 			// configuration of the application even when the

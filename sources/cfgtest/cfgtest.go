@@ -2,8 +2,6 @@
 package cfgtest
 
 import (
-	"testing"
-
 	"github.com/simplesurance/proteus/sources"
 	"github.com/simplesurance/proteus/types"
 )
@@ -12,14 +10,13 @@ import (
 // value for the parameters can be provided on construction. The returned
 // object can be used to change the values, allowing for tests on parameters
 // that change without reloading.
-func New(t *testing.T, values types.ParamValues) *TestSource {
-	return &TestSource{values: values, t: t}
+func New(values types.ParamValues) *TestSource {
+	return &TestSource{values: values}
 }
 
 // TestSource is an application configuration source designed to be used on
 // tests.
 type TestSource struct {
-	t       *testing.T
 	values  types.ParamValues
 	updater sources.Updater
 }

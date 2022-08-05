@@ -20,7 +20,7 @@ import (
 func TestDefaultValueAllTypes(t *testing.T) {
 	testWriter := testWriter{t}
 
-	testSource := cfgtest.New(t, types.ParamValues{})
+	testSource := cfgtest.New(types.ParamValues{})
 
 	localhost, _ := url.Parse("https://localhost")
 
@@ -117,7 +117,7 @@ func TestEmbeddingParameters(t *testing.T) {
 		DevMode bool
 	}{}
 
-	testSource := cfgtest.New(t, types.ParamValues{
+	testSource := cfgtest.New(types.ParamValues{
 		"": map[string]string{
 			"devmode":  "true",
 			"embparam": "emb1",
@@ -170,7 +170,7 @@ func TestEmbeddingParamSet(t *testing.T) {
 		logConfig
 	}{}
 
-	testSource := cfgtest.New(t, types.ParamValues{
+	testSource := cfgtest.New(types.ParamValues{
 		"http": map[string]string{
 			"ip":   "127.0.0.1",
 			"port": "42",

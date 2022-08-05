@@ -29,7 +29,7 @@ func TestSignedInt(t *testing.T) {
 	}
 
 	parsed, err := proteus.MustParse(&params, proteus.WithSources(
-		cfgtest.New(t, providedParameters)))
+		cfgtest.New(providedParameters)))
 	require.NoError(t, err)
 
 	buffer := bytes.Buffer{}
