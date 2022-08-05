@@ -9,25 +9,7 @@ import (
 	"github.com/simplesurance/proteus/sources/cfgflags"
 )
 
-func ExampleMustParse() {
-	params := struct {
-		Server string
-		Port   uint16
-	}{}
-
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
-		cfgflags.New(),
-		cfgenv.New("CFG"),
-	))
-	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("Server: %s:%d\n", params.Server, params.Port)
-}
-
-func ExampleMustParse_withTags() {
+func Example_tagsAndDefaults() {
 	params := struct {
 		Enabled bool   `param:"is_enabled,optional" param_desc:"Allows enabling or disabling the HTTP server"`
 		Port    uint16 `param:",optional"           param_desc:"Port to bind for the HTTP server"`
