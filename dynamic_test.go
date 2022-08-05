@@ -44,11 +44,11 @@ func TestDynamic(t *testing.T) {
 		},
 	}
 
-	source := cfgtest.New(types.ParamValues{
+	provider := cfgtest.New(types.ParamValues{
 		"": map[string]string{"x": wantedValues[0]},
 	})
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(source))
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
 	if err != nil {
 		buffer := bytes.Buffer{}
 		parsed.ErrUsage(&buffer, err)
@@ -66,7 +66,7 @@ func TestDynamic(t *testing.T) {
 		// here will update the value in one routine while reading it on a busy
 		// loop to allow the race detector to find concurrency issues.
 		go func() {
-			source.Update("", "x", value)
+			provider.Update("", "x", value)
 		}()
 
 		start := time.Now()

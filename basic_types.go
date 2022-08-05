@@ -14,7 +14,7 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 
 	// non-xtype values are either left alone with whatever value they
 	// had initially, or written once, with a value provided by a
-	// configuration source.
+	// configuration provider.
 	switch val.Type().Kind() {
 	case reflect.String:
 		fieldData.validFn = func(str string) error {

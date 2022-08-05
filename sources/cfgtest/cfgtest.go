@@ -1,4 +1,4 @@
-// Package cfgtest is a configuration source to be used on tests.
+// Package cfgtest is a configuration provider to be used on tests.
 package cfgtest
 
 import (
@@ -6,26 +6,26 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// New creates a new parameter source that can be used on tests. An initial
+// New creates a new provider that can be used on tests. An initial
 // value for the parameters can be provided on construction. The returned
 // object can be used to change the values, allowing for tests on parameters
 // that change without reloading.
-func New(values types.ParamValues) *TestSource {
-	return &TestSource{values: values}
+func New(values types.ParamValues) *TestProvider {
+	return &TestProvider{values: values}
 }
 
-// TestSource is an application configuration source designed to be used on
+// TestProvider is an application configuration provider designed to be used on
 // tests.
-type TestSource struct {
+type TestProvider struct {
 	values  types.ParamValues
 	updater sources.Updater
 }
 
-var _ sources.Source = &TestSource{}
+var _ sources.Provider = &TestProvider{}
 
 // Update changes a value on the test provider, allowing for test on
 // hot-reloading of parameters.
-func (r *TestSource) Update(setid, id string, value string) {
+func (r *TestProvider) Update(setid, id string, value string) {
 	set, ok := r.values[setid]
 	if !ok {
 		set = map[string]string{}
@@ -38,13 +38,13 @@ func (r *TestSource) Update(setid, id string, value string) {
 }
 
 // Stop does nothing.
-func (r *TestSource) Stop() {
+func (r *TestProvider) Stop() {
 }
 
 // Watch reads parameters from environment variables. Since environment
 // variables never change, we only read once, and we don't have to watch
 // for changes.
-func (r *TestSource) Watch(
+func (r *TestProvider) Watch(
 	paramIDs sources.Parameters,
 	updater sources.Updater,
 ) (initial types.ParamValues, err error) {

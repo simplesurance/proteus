@@ -15,7 +15,7 @@ func ExampleParsed_Usage() {
 		Port: 5432,
 	}
 
-	parsed, _ := proteus.MustParse(&params, proteus.WithSources(cfgenv.New("TEST")))
+	parsed, _ := proteus.MustParse(&params, proteus.WithProviders(cfgenv.New("TEST")))
 
 	parsed.Usage(os.Stdout)
 

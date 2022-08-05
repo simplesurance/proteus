@@ -15,7 +15,7 @@ func ExampleMustParse() {
 		Port   uint16
 	}{}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
 		cfgflags.New(),
 		cfgenv.New("CFG"),
 	))
@@ -37,7 +37,7 @@ func ExampleMustParse_withTags() {
 		Port:    8080,
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
 		cfgflags.New(),
 		cfgenv.New("CFG"),
 	))

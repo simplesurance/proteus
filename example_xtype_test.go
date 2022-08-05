@@ -24,7 +24,7 @@ func Example_xtypes() {
 		},
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
 		cfgflags.New(),
 		cfgenv.New("CFG"),
 	))

@@ -15,7 +15,7 @@ func Example_paramSet() {
 		DB   dbParams
 	}{}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
 		cfgflags.New(),
 		cfgenv.New("CFG"),
 	))

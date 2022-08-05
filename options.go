@@ -10,7 +10,7 @@ import (
 type Option func(*settings)
 
 type settings struct {
-	sources           []sources.Source
+	providers         []sources.Provider
 	autoUsageExitFn   func()
 	autoUsageHeadline string
 	autoUsageWriter   io.Writer
@@ -23,13 +23,10 @@ func (s *settings) apply(options ...Option) {
 	}
 }
 
-// WithSources adds configuration sources to be used to read values for the
-// application parameters. It can be called multiple times. If a parameter is
-// found in more than one source, the source that was added first takes
-// precedence.
-func WithSources(s ...sources.Source) Option {
+// WithProviders specifies from where the configuration should be read.
+func WithProviders(s ...sources.Provider) Option {
 	return func(p *settings) {
-		p.sources = append(p.sources, s...)
+		p.providers = append(p.providers, s...)
 	}
 }
 

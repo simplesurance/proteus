@@ -7,7 +7,7 @@
 //
 //     ./binary -param1 value1 -param2 value2
 //
-// Values can optionally be provided in a key=value way. The two styles can
+// Values can optionally be provided in a key=value format. The two styles can
 // be interchanged freely:
 //
 //     ./binary -param1=value1 -param2 value2
@@ -42,19 +42,19 @@ var (
 	errIsSetName = errors.New("is a set name, not a parameter")
 )
 
-// New creates a new parameter source that reads from command-line flags.
+// New creates a new provider that reads from command-line flags.
 // See package documentation for details on how to provide command-line
 // parameters.
-func New() sources.Source {
-	return &source{}
+func New() sources.Provider {
+	return &flagProvider{}
 }
 
-type source struct{}
+type flagProvider struct{}
 
-func (r *source) Stop() {
+func (r *flagProvider) Stop() {
 }
 
-func (r *source) Watch(
+func (r *flagProvider) Watch(
 	paramIDs sources.Parameters,
 	updater sources.Updater,
 ) (initial types.ParamValues, err error) {

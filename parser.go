@@ -32,14 +32,14 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 		panic(fmt.Errorf("INVALID CONFIGURATION STRUCT: %v", err))
 	}
 
-	if len(opts.sources) == 0 {
-		panic("NO CONFIGURATION SOURCE WAS PROVIDED")
+	if len(opts.providers) == 0 {
+		panic("NO CONFIGURATION PROVIDER WAS PROVIDED")
 	}
 
 	ret := Parsed{
 		settings:      opts,
 		inferedConfig: appConfig,
-		values:        make([]types.ParamValues, len(opts.sources)),
+		values:        make([]types.ParamValues, len(opts.providers)),
 	}
 
 	if err := addSpecialFlags(appConfig, &ret, opts); err != nil {
@@ -47,13 +47,13 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 	}
 
 	// start watching each configuration item on each provider
-	for ix, source := range opts.sources {
+	for ix, provider := range opts.providers {
 		updater := &updater{
 			parsed:        &ret,
 			providerIndex: ix,
-			providerName:  fmt.Sprintf("%T", source)}
+			providerName:  fmt.Sprintf("%T", provider)}
 
-		initial, err := source.Watch(appConfig.configIDs(), updater)
+		initial, err := provider.Watch(appConfig.paramInfo(), updater)
 		if err != nil {
 			return &ret, err
 		}

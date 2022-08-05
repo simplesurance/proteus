@@ -20,7 +20,7 @@ import (
 func TestDefaultValueAllTypes(t *testing.T) {
 	testWriter := testWriter{t}
 
-	testSource := cfgtest.New(types.ParamValues{})
+	testProvider := cfgtest.New(types.ParamValues{})
 
 	localhost, _ := url.Parse("https://localhost")
 
@@ -71,7 +71,7 @@ func TestDefaultValueAllTypes(t *testing.T) {
 	}
 
 	parsed, err := proteus.MustParse(&cfg,
-		proteus.WithSources(testSource),
+		proteus.WithProviders(testProvider),
 		proteus.WithLogger(newTestLogger(t)))
 	if err != nil {
 		t.Logf("Unexpected error parsing configuration: %+v", err)
@@ -117,7 +117,7 @@ func TestEmbeddingParameters(t *testing.T) {
 		DevMode bool
 	}{}
 
-	testSource := cfgtest.New(types.ParamValues{
+	testProvider := cfgtest.New(types.ParamValues{
 		"": map[string]string{
 			"devmode":  "true",
 			"embparam": "emb1",
@@ -128,10 +128,10 @@ func TestEmbeddingParameters(t *testing.T) {
 		},
 	})
 
-	defer testSource.Stop()
+	defer testProvider.Stop()
 
 	parsed, err := proteus.MustParse(&testAppCfg,
-		proteus.WithSources(testSource),
+		proteus.WithProviders(testProvider),
 		proteus.WithLogger(newTestLogger(t)))
 	if err != nil {
 		t.Logf("Unexpected error parsing configuration: %+v", err)
@@ -170,7 +170,7 @@ func TestEmbeddingParamSet(t *testing.T) {
 		logConfig
 	}{}
 
-	testSource := cfgtest.New(types.ParamValues{
+	testProvider := cfgtest.New(types.ParamValues{
 		"http": map[string]string{
 			"ip":   "127.0.0.1",
 			"port": "42",
@@ -180,10 +180,10 @@ func TestEmbeddingParamSet(t *testing.T) {
 		},
 	})
 
-	defer testSource.Stop()
+	defer testProvider.Stop()
 
 	parsed, err := proteus.MustParse(&testAppCfg,
-		proteus.WithSources(testSource),
+		proteus.WithProviders(testProvider),
 		proteus.WithLogger(newTestLogger(t)))
 	if err != nil {
 		t.Logf("Unexpected error parsing configuration: %+v", err)

@@ -28,7 +28,7 @@ func TestSignedInt(t *testing.T) {
 		},
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
 		cfgtest.New(providedParameters)))
 	require.NoError(t, err)
 

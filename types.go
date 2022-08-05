@@ -7,9 +7,10 @@ import (
 
 type config map[string]paramSet
 
-// configIDs create configuration information that can be used by a
-// configuration source.
-func (c config) configIDs() sources.Parameters {
+// paramInfo returns information about the required parameter, including the
+// names of the parameters and some additional information that providers
+// may need.
+func (c config) paramInfo() sources.Parameters {
 	ret := make(sources.Parameters, len(c))
 
 	for fsName, fs := range c {

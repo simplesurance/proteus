@@ -15,9 +15,6 @@
 //     replace "-" by "_"
 //     uppercase
 //
-// Handling of booleans: the value of the environment variable must be a
-// valid go boolean, except for empty string, which is assumed to be "true".
-//
 // For example, is the prefix is "cfg":
 //
 //     param=test1-parameter           => env=CFG__TEST1_PARAMETER
@@ -26,7 +23,7 @@
 //
 // Note that both "-" and "_" are mapped to "_". For this reason, if one
 // application has two parameters that are differentiated only this letter,
-// it can't be configured using this configuration source.
+// it can't be configured using this configuration provider.
 package cfgenv
 
 import (
@@ -38,20 +35,20 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// New create a new source that allows configuring parameters using environment
-// variables. See package description for details.
-func New(prefix string) sources.Source {
-	return &source{prefix: prefix}
+// New create a new provider that allows configuring parameters using
+// environment variables. See package description for details.
+func New(prefix string) sources.Provider {
+	return &envVarProvider{prefix: prefix}
 }
 
-type source struct {
+type envVarProvider struct {
 	prefix string
 }
 
-func (r *source) Stop() {
+func (r *envVarProvider) Stop() {
 }
 
-func (r *source) Watch(
+func (r *envVarProvider) Watch(
 	paramIDs sources.Parameters,
 	updater sources.Updater,
 ) (initial types.ParamValues, _ error) {
@@ -67,7 +64,7 @@ func parse(
 
 	ret := types.ParamValues{}
 	for setName, set := range paramIDs {
-		for paramName, paramInfo := range set {
+		for paramName := range set {
 			envName := envVarName(setName, paramName, prefix)
 			value, ok := env[envName]
 			if !ok {
@@ -78,12 +75,6 @@ func parse(
 			if !ok {
 				set = map[string]string{}
 				ret[setName] = set
-			}
-
-			// for boolean parameters empty values are handled as
-			// boolean true. See package description
-			if value == "" && paramInfo.IsBool {
-				value = "true"
 			}
 
 			set[paramName] = value

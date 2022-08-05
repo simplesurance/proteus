@@ -29,7 +29,7 @@ func TestCfgEnv(t *testing.T) {
 	os.Clearenv()
 	require.NoError(t, os.Setenv("TEST__A", "1"))
 	require.NoError(t, os.Setenv("TEST__B", "2"))
-	require.NoError(t, os.Setenv("TEST__ENABLED_BOOL", ""))
+	require.NoError(t, os.Setenv("TEST__ENABLED_BOOL", "true"))
 
 	require.NoError(t, os.Setenv("TEST__PARAMSET1__A", "11"))
 	require.NoError(t, os.Setenv("TEST__PARAMSET1__B", "12"))

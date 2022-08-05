@@ -14,7 +14,7 @@ func Example() {
 		Port   uint16 `param:",optional"`
 	}{}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(types.ParamValues{
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(cfgtest.New(types.ParamValues{
 		"": map[string]string{
 			"server": "localhost.localdomain",
 			"port":   "42",

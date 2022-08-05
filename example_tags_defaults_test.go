@@ -19,7 +19,7 @@ func Example_tagsAndDefaults() {
 		Port:    8080,
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
 		cfgflags.New(),
 		cfgenv.New("CFG"),
 	))

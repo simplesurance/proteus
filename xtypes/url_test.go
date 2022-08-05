@@ -24,13 +24,13 @@ func TestSimpleURL(t *testing.T) {
 		URL *xtypes.URL
 	}{}
 
-	source := types.ParamValues{
+	provider := cfgtest.New(types.ParamValues{
 		"": map[string]string{
 			"url": fullURLString,
 		},
-	}
+	})
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
 	require.NoError(t, err)
 
 	buffer := bytes.Buffer{}
@@ -54,11 +54,11 @@ func TestDefaultURL(t *testing.T) {
 		URL: &xtypes.URL{DefaultValue: defaultURL},
 	}
 
-	source := types.ParamValues{
+	provider := cfgtest.New(types.ParamValues{
 		"": map[string]string{},
-	}
+	})
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
 	require.NoError(t, err)
 
 	buffer := bytes.Buffer{}
@@ -79,11 +79,11 @@ func TestEmptyURL(t *testing.T) {
 		URL: &xtypes.URL{ValidateFn: func(u *url.URL) error { return nil }},
 	}
 
-	source := types.ParamValues{
+	provider := cfgtest.New(types.ParamValues{
 		"": map[string]string{"url": ""},
-	}
+	})
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
+	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
 	require.NoError(t, err)
 
 	buffer := bytes.Buffer{}
@@ -133,13 +133,13 @@ func TestCustomValidator(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			source := types.ParamValues{
+			provider := cfgtest.New(types.ParamValues{
 				"": map[string]string{
 					"url": tc.haveURL,
 				},
-			}
+			})
 
-			parsed, err := proteus.MustParse(&params, proteus.WithSources(cfgtest.New(source)))
+			parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
 
 			// parsed is always not-null to allow querying the
 			// configuration of the application even when the
