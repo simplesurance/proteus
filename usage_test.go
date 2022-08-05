@@ -1,9 +1,7 @@
 package proteus_test
 
 import (
-	"bufio"
-	"bytes"
-	"fmt"
+	"os"
 
 	"github.com/simplesurance/proteus"
 	"github.com/simplesurance/proteus/sources/cfgenv"
@@ -19,13 +17,7 @@ func ExampleParsed_Usage() {
 
 	parsed, _ := proteus.MustParse(&params, proteus.WithSources(cfgenv.New("TEST")))
 
-	buffer := bytes.Buffer{}
-	parsed.Usage(&buffer)
-
-	scanner := bufio.NewScanner(&buffer)
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
+	parsed.Usage(os.Stdout)
 
 	// Output:
 	// Syntax:

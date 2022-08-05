@@ -32,7 +32,7 @@ func ExampleMustParse_defaultValues() {
 	params := struct {
 		Enabled bool   `param:"is_enabled,optional" param_desc:"Allows enabling or disabling the HTTP server"`
 		Port    uint16 `param:",optional"           param_desc:"Port to bind for the HTTP server"`
-		Token   string `param:",secret"             param_desc:"Token clients must provide for authentication"`
+		Token   string `param:",secret"             param_desc:"Client authentication token"`
 	}{
 		Enabled: true,
 		Port:    8080,

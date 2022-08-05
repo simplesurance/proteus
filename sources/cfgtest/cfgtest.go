@@ -1,4 +1,4 @@
-// Package cfgtest implements a configuration reader that can be used on tests.
+// Package cfgtest implements a configuration reader that can be used in tests.
 package cfgtest
 
 import (
