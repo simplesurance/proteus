@@ -45,6 +45,10 @@ type envVarProvider struct {
 	prefix string
 }
 
+func (r *envVarProvider) IsCommandLineFlag() bool {
+	return false
+}
+
 func (r *envVarProvider) Stop() {
 }
 

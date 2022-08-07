@@ -238,18 +238,6 @@ func (p *Parsed) mergeValues() types.ParamValues {
 	return ret
 }
 
-func (p *Parsed) readValue(setName, paramName string) *string {
-	for _, providerData := range p.values {
-		if set, ok := providerData[setName]; ok {
-			if val, ok := set[paramName]; ok {
-				return &val
-			}
-		}
-	}
-
-	return nil
-}
-
 // validValue test if a value is valid for a given parameter. It has no
 // side effects.
 func (p *Parsed) validValue(setName, paramName string, value *string) error {

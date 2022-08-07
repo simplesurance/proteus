@@ -23,6 +23,12 @@ type TestProvider struct {
 
 var _ sources.Provider = &TestProvider{}
 
+// IsCommandLineFlag returns true, to allow tests to handle special flags that
+// only command-line flags are allowed to process.
+func (r *TestProvider) IsCommandLineFlag() bool {
+	return true
+}
+
 // Update changes a value on the test provider, allowing for test on
 // hot-reloading of parameters.
 func (r *TestProvider) Update(setid, id string, value string) {

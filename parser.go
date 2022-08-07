@@ -3,12 +3,10 @@ package proteus
 import (
 	"errors"
 	"fmt"
-	"os"
 	"reflect"
 	"strings"
 
 	"github.com/simplesurance/proteus/internal/consts"
-	"github.com/simplesurance/proteus/internal/specialflags"
 	"github.com/simplesurance/proteus/types"
 )
 
@@ -53,7 +51,9 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 			providerIndex: ix,
 			providerName:  fmt.Sprintf("%T", provider)}
 
-		initial, err := provider.Watch(appConfig.paramInfo(), updater)
+		initial, err := provider.Watch(
+			appConfig.paramInfo(provider.IsCommandLineFlag()),
+			updater)
 		if err != nil {
 			return &ret, err
 		}
@@ -62,8 +62,6 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 		// values are updated
 		updater.update(initial, false)
 	}
-
-	processSpecialFlags(appConfig, &ret, opts)
 
 	if err := ret.valid(); err != nil {
 		return &ret, err
@@ -287,51 +285,48 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 }
 
 func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
-	// support special flags
 	var violations types.ErrViolations
+
+	// --help
 	if opts.autoUsageExitFn != nil {
-		if conflictingParam, ok := appConfig[""].fields[specialflags.Help.Name]; ok {
+		helpFlagName := "help"
+		helpFlagDescription := "Prints information about how to use this application"
+
+		if conflictingParam, exists := appConfig.getParam("", helpFlagName); exists {
 			violations = append(violations, types.Violation{
-				ParamName: specialflags.Help.Name,
+				ParamName: helpFlagName,
 				Path:      conflictingParam.path,
 				Message:   "The help parameter cannot be used with the auto-usage is requested",
 			})
-		}
+		} else {
+			appConfig[""].fields[helpFlagName] = paramSetField{
+				typ:       "bool",
+				optional:  true,
+				desc:      helpFlagDescription,
+				boolean:   true,
+				isSpecial: true,
 
-		appConfig[""].fields[specialflags.Help.Name] = paramSetField{
-			typ:      "bool",
-			optional: true,
-			desc:     specialflags.Help.Description,
-			boolean:  true,
+				setValueFn: func(_ *string) error {
+					fmt.Fprintln(opts.autoUsageWriter, opts.autoUsageHeadline)
+					parsed.Usage(opts.autoUsageWriter)
+					parsed.settings.autoUsageExitFn()
+					panic("Auto usage termination callback function did not terminated the application")
+				},
 
-			setValueFn: func(v *string) error {
-				parsed.Usage(os.Stdout)
-				opts.autoUsageExitFn()
-				return nil
-			},
-
-			validFn:      func(v string) error { return nil },
-			getDefaultFn: func() (string, error) { return "false", nil },
-			redactFn:     func(s string) string { return s },
+				validFn:      func(v string) error { return nil },
+				getDefaultFn: func() (string, error) { return "false", nil },
+				redactFn:     func(s string) string { return s },
+			}
 		}
 	}
+
+	// TODO: support --dry-mode
 
 	if len(violations) > 0 {
 		return nil
 	}
 
 	return nil
-}
-
-func processSpecialFlags(appConfig config, parsed *Parsed, opts settings) {
-	if parsed.settings.autoUsageExitFn == nil || parsed.readValue("", specialflags.Help.Name) == nil {
-		return
-	}
-
-	fmt.Fprintln(opts.autoUsageWriter, opts.autoUsageHeadline)
-	parsed.Usage(opts.autoUsageWriter)
-	parsed.settings.autoUsageExitFn()
-	panic("Auto usage termination callback function did not terminated the application")
 }
 
 func describeType(val reflect.Value) string {

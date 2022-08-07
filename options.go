@@ -10,11 +10,13 @@ import (
 type Option func(*settings)
 
 type settings struct {
-	providers         []sources.Provider
+	providers []sources.Provider
+	loggerFn  Logger
+
+	// auto-usage (aka --help)
 	autoUsageExitFn   func()
 	autoUsageHeadline string
 	autoUsageWriter   io.Writer
-	loggerFn          Logger
 }
 
 func (s *settings) apply(options ...Option) {

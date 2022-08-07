@@ -33,7 +33,6 @@ import (
 	"strings"
 
 	"github.com/simplesurance/proteus/internal/consts"
-	"github.com/simplesurance/proteus/internal/specialflags"
 	"github.com/simplesurance/proteus/sources"
 	"github.com/simplesurance/proteus/types"
 )
@@ -50,6 +49,10 @@ func New() sources.Provider {
 }
 
 type flagProvider struct{}
+
+func (r *flagProvider) IsCommandLineFlag() bool {
+	return true
+}
 
 func (r *flagProvider) Stop() {
 }
@@ -70,13 +73,6 @@ func (r *flagProvider) Watch(
 		}
 
 		isBoolFn := func(paramName string) (isBool, ok bool) {
-			// "--help" and "--dry-run" are always accepted from
-			// command-line flags, and are always boolean
-			// TODO: accept the flags only if configured
-			if setName == "" && (paramName == specialflags.Help.Name || paramName == specialflags.DryMode.Name) {
-				return true, true
-			}
-
 			if set, ok := paramIDs[setName]; ok {
 				if paramInfo, ok := set[paramName]; ok {
 					return paramInfo.IsBool, true

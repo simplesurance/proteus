@@ -15,6 +15,11 @@ type Provider interface {
 		paramIDs Parameters,
 		updater Updater,
 	) (initial types.ParamValues, err error)
+
+	// IsCommandLineFlag indicates if this provider reads from command-line
+	// flags. Some "special parameters", like "--help" can only be handled
+	// by command-line flags.
+	IsCommandLineFlag() bool
 }
 
 // Updater is an interface that allow providers to notify about changes on
@@ -41,6 +46,17 @@ type Updater interface {
 // Parameters contains information about what parameters the application
 // expect, as long as some basic information about them.
 type Parameters map[string]map[string]ParameterInfo
+
+// Get returns the parameter information with the given set and parameter name.
+func (p Parameters) Get(setName, paramName string) (ret ParameterInfo, found bool) {
+	if set, ok := p[setName]; ok {
+		if info, ok := set[paramName]; ok {
+			return info, true
+		}
+	}
+
+	return ret, false
+}
 
 // ParameterInfo holds information about a configuration parameter.
 type ParameterInfo struct {

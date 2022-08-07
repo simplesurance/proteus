@@ -1,22 +1,31 @@
 package proteus
 
 import (
-	"github.com/simplesurance/proteus/internal/specialflags"
 	"github.com/simplesurance/proteus/sources"
 )
 
 type config map[string]paramSet
 
+func (c config) getParam(setName, paramName string) (ret paramSetField, exists bool) {
+	if set, ok := c[setName]; ok {
+		if ret, ok := set.fields[paramName]; ok {
+			return ret, true
+		}
+	}
+
+	return ret, false
+}
+
 // paramInfo returns information about the required parameter, including the
 // names of the parameters and some additional information that providers
-// may need.
-func (c config) paramInfo() sources.Parameters {
+// may need. Special parameters (like --help) are optionally included.
+func (c config) paramInfo(includeSpecial bool) sources.Parameters {
 	ret := make(sources.Parameters, len(c))
 
 	for fsName, fs := range c {
 		paramIDs := make(map[string]sources.ParameterInfo, len(fs.fields))
 		for paramName, info := range fs.fields {
-			if fsName == "" && (paramName == specialflags.Help.Name || paramName == specialflags.DryMode.Name) {
+			if info.isSpecial && !includeSpecial {
 				continue
 			}
 
@@ -44,6 +53,10 @@ type paramSetField struct {
 	desc     string
 	boolean  bool
 	path     string
+
+	// isSpecial specifies that the parameter cannot be specified by all
+	// providers, line --help.
+	isSpecial bool
 
 	isXtype      bool // implements the types.XType interface
 	setValueFn   func(v *string) error
