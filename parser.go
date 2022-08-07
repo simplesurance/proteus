@@ -10,12 +10,97 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// MustParse receives on "config" a struct that defines the expected
-// application parameters and loads the parameters values into it.
+// MustParse receives on "config" a pointer to a struct that defines the
+// expected application parameters and loads the parameters values into it.
+// An example of a configuration is struct is as follows:
 //
-// There is support for sub-parameters and for getting updates about
-// changes in value without the need to restart the application. See godoc
-// examples for usage.
+//	params := struct{
+//		Name      string                                       // simple parameter
+//		IsEnabled bool   `param:"is_enabled"`                  // rename parameter
+//		Password  string `param:"pwd,secret"`                  // rename and mark parameter as secret
+//		Port      uint16 `param:",optional"`                   // keep the name, mark as optional
+//		LogLevel  string `param_desc:"Cut-off level for logs"` // describes the parameter
+//		X         string `param:"-"`                           // ignore this field
+//	}{
+//		Port: 8080, // default value for optional parameter
+//	}
+//
+// The tag "param" has the format "name[,option]*", where name is either empty,
+// "-" or a lowercase arbitrary string containing a-z, 0-9, _ or -, starting with a-z and
+// terminating not with - or _.
+// The value "-" for the name result in the field being ignored. The empty
+// string value indicates to infer the parameter name from the struct name. The
+// inferred parameter name is the struct name in lowercase.
+// Option can be either "secret" or "optional". An option can be provided
+// without providing the name of the parameter by using an empty value for the
+// name, resulting in the "param" tag starting with ",".
+//
+// The tag "param_desc" is an arbitrary string describing what the parameter
+// is for. This will be shown to the user when usage information is requested.
+//
+// The provided struct can have any level of embedded structs. Embedded
+// structs are handled as if they were "flat":
+//
+//	type httpParams struct {
+//		Server string
+//		Port   uint16
+//	}
+//
+//	parmas := struct{
+//		httpParams
+//		LogLevel string
+//	}{}
+//
+// Is the same as:
+//
+//	params := struct {
+//		Server   string
+//		Port     uint16
+//		LogLevel string
+//	}{}
+//
+// Configuration structs can also have "xtypes". Xtypes provide support for
+// getting updates when parameter values change and other types-specific
+// optons.
+//
+//	params := struct{
+//		LogLevel *xtypes.OneOf
+//	}{
+//		OneOf: &xtypes.OneOf{
+//			Choices: []string{"debug", "info", "error"},
+//			Default: "info",
+//			UpdateFn: func(newVal string) {
+//				fmt.Printf("new log level: %s\n", newVal)
+//			}
+//		}
+//	}
+//
+// The "options" parameter provides further customization. The option
+// WithProviders() must be specified to define from what sources the parameters
+// must be read.
+//
+// Complete usage example:
+//
+//	func main() {
+//		params := struct {
+//			X int
+//		}{}
+//
+//		parsed, err := proteus.MustParse(&params,
+//			proteus.WithAutoUsage(os.Stdout, "My Application", func() { os.Exit(0) }),
+//			proteus.WithProviders(
+//				cfgflags.New(),
+//				cfgenv.New("CFG"),
+//			))
+//		if err != nil {
+//			parsed.ErrUsage(os.Stderr, err)
+//			os.Exit(1)
+//		}
+//
+//		// "parsed" now have the parameter values
+//	}
+//
+// See godoc for more examples.
 //
 // A Parsed object is guaranteed to be always returned, even in case of error,
 // allowing the creation of useful error messages.
