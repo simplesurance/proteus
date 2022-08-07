@@ -10,20 +10,20 @@
 // The rule for determining the environment variable that configures a
 // parameter is as follows:
 //
-//     {prefix}__{paramname}            (if parameter is not on a set)
-//     {prefix}__{setname}__{paramname} (if parameter is on a set)
-//     replace "-" by "_"
-//     uppercase
+//	{prefix}__{paramname}            (if parameter is not on a set)
+//	{prefix}__{setname}__{paramname} (if parameter is on a set)
+//	replace "-" by "_"
+//	uppercase
 //
-// For example, is the prefix is "cfg":
+// For example, if the prefix is "cfg":
 //
-//     param=test1-parameter           => env=CFG__TEST1_PARAMETER
-//     param=test2_parameter           => env=CFG__TEST2_PARAMETER
-//     param=address          set=http => env=CFG__HTTP__ADDRESS
+//	param=test1-parameter           => env=CFG__TEST1_PARAMETER
+//	param=test2_parameter           => env=CFG__TEST2_PARAMETER
+//	param=address          set=http => env=CFG__HTTP__ADDRESS
 //
 // Note that both "-" and "_" are mapped to "_". For this reason, if one
-// application has two parameters that are differentiated only this letter,
-// it can't be configured using this configuration provider.
+// application has two parameters that are differentiated only by this
+// character, it can't be configured using this configuration provider.
 package cfgenv
 
 import (
@@ -35,7 +35,7 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// New create a new provider that allows configuring parameters using
+// New creates a new provider that allows configuring parameters using
 // environment variables. See package description for details.
 func New(prefix string) sources.Provider {
 	return &envVarProvider{prefix: prefix}

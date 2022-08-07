@@ -5,25 +5,24 @@
 //
 // Providing two parameters:
 //
-//     ./binary -param1 value1 -param2 value2
+//	./binary -param1 value1 -param2 value2
 //
 // Values can optionally be provided in a key=value format. The two styles can
 // be interchanged freely:
 //
-//     ./binary -param1=value1 -param2 value2
+//	./binary -param1=value1 -param2 value2
 //
 // Boolean flags are a special case. They can be provided in one of two ways:
 //
-//    ./binary -flag
-//    ./binary -flag=<true|false>
+//	./binary -flag
+//	./binary -flag=<true|false>
 //
 // Boolean flags CANNOT be provided using "-flag <true|false>".
 //
 // Parameter sets can be provided. For example, to provide a set of parameters
 // for "http" and a set of parameters for "grpc", use:
 //
-//     ./binary http -addr :8080 -max-connections 64 -enabled grpc -addr :6800 -enabled=true
-//
+//	./binary http -addr :8080 -max-connections 64 -enabled grpc -addr :6800 -enabled=true
 package cfgflags
 
 import (
@@ -164,7 +163,7 @@ func readParam(
 
 	isBool, found := isBoolFn(paramName)
 	if !found {
-		// without knowing if the parameter is boolean or not is not
+		// without knowing if the parameter is boolean or not, it is not
 		// possible to determine how to process the remaining
 		// flags. For example, the command line:
 		//

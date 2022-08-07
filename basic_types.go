@@ -137,6 +137,6 @@ func configAsUint(fieldData *paramSetField, val reflect.Value, bitSize int) {
 
 func panicOnNil(v *string) {
 	if v == nil {
-		panic("bug: tried to set non-xtype parameter to nil")
+		panic("unexpected: tried to set non-xtype parameter to nil")
 	}
 }

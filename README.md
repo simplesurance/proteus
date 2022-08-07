@@ -144,7 +144,7 @@ func main() {
 }
 ```
 
-Only token has to be specified:
+Only `-token` is mandatory:
 
 ```bash
 go run *.go -token my-secret-token
@@ -202,7 +202,7 @@ To have usage information include the `WithAutoUsage` option:
 func main() {
 	params := struct {
 		Database    dbParams
-		Environment *xtypes.OneOf `param_desc:"What environment the app is running on"`
+		Environment *xtypes.OneOf `param_desc:"Which environment the app is running on"`
 		Port        uint16
 	}{
 		Database: defaultDBParams(),
@@ -227,7 +227,7 @@ func main() {
 
 type dbParams struct {
 	Server   string `param:",optional"    param_desc:"Name of the database server"`
-	Port     uint16 `param:",optional"    param_desc:"TCP port number of database server"`
+	Port     uint16 `param:",optional"    param_desc:"TCP port number of the database server"`
 	User     string `                     param_desc:"Username for authentication"`
 	Password string `                     param_desc:"Password for authentication"`
 }
@@ -258,7 +258,7 @@ go run main.go --help
 # 
 # PARAMETERS
 # - environment:(dev|stg|prd)
-#   What environment the app is running on
+#   Which environment the app is running on
 # - port:uint16
 # - help:bool default=false
 #   Display usage instructions
@@ -269,7 +269,7 @@ go run main.go --help
 # - user:string
 #   Username for authentication
 # - port:uint16 default=5432
-#   TCP port number of database server
+#   TCP port number of the database server
 # - server:string default=localhost
 #   Name of the database server
 ```

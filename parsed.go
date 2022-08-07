@@ -30,9 +30,9 @@ func (p *Parsed) Usage(w io.Writer) {
 }
 
 // ErrUsage is a specialized version of Usage(), that is intended
-// to be used when parsing the configuration failed and
-// will show to the user what is wrong with the provided parameters.
-// It does not terminate the application.
+// to be used when configuration parsing failed. Additionally to the
+// usage text, it also outputs the validation errors with the supplied
+// parameters. It does not terminate the application.
 func (p *Parsed) ErrUsage(w io.Writer, err error) {
 	fmt.Fprintln(w, "Invalid configuration parameters for application")
 	if err != nil {

@@ -34,7 +34,7 @@ func TestDynamic(t *testing.T) {
 		X: &xtypes.String{
 			UpdateFn: func(s string) {
 				// Each time this callback function is called we expect
-				// that is called with one of the values form the wanted
+				// that is called with one of the values from the wanted
 				// values, in order.
 				callIx := atomic.AddInt32(&callbackInvoked, 1) - 1
 				t.Logf("callback invoked callIx=%d value=%s", callIx, s)
