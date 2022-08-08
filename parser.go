@@ -130,7 +130,7 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 	}
 	opts.apply(options...)
 
-	appConfig, err := mustInferConfigFromValue(config, opts)
+	appConfig, err := inferConfigFromValue(config, opts)
 	if err != nil {
 		panic(fmt.Errorf("INVALID CONFIGURATION STRUCT: %v", err))
 	}
@@ -177,7 +177,7 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 	return &ret, nil
 }
 
-func mustInferConfigFromValue(value any, opts settings) (config, error) {
+func inferConfigFromValue(value any, opts settings) (config, error) {
 	if reflect.ValueOf(value).Kind() != reflect.Ptr {
 		return nil, errors.New("configuration struct must be a pointer")
 	}
