@@ -79,6 +79,25 @@ import (
 // WithProviders() must be specified to define from what sources the parameters
 // must be read.
 //
+// The configuration struct can have named sub-structs (in opposition to
+// named, or embedded sub-structs, already mentioned above). The sub-structs
+// can be up to 1 level deep, and can be used to represent "parameter sets".
+// Two parameters can have the same name, as long as they belong to different
+// parameter sets. Example:
+//
+//	params := struct{
+//		Database struct {
+//			Host     string
+//			Username string
+//			Password string `param:,secret`
+//		}
+//		Tracing struct {
+//			Host     string
+//			Username string
+//			Password string `param:,secret`
+//		}
+//	}{}
+//
 // Complete usage example:
 //
 //	func main() {
