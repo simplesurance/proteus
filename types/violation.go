@@ -86,6 +86,5 @@ func (v Violation) String() string {
 
 	sb.WriteString(v.Message)
 
-	r := sb.String()
-	return r
+	return strings.TrimSpace(sb.String())
 }
