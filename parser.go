@@ -3,6 +3,7 @@ package proteus
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 
@@ -410,14 +411,19 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 				boolean:   true,
 				isSpecial: true,
 
-				setValueFn: func(_ *string) error {
+				// when the --help flag is provided, the parsed object will
+				// try to determine if the value is valid. Generate the
+				// help usage instead of terminate the application.
+				validFn: func(v string) error {
 					fmt.Fprintln(opts.autoUsageWriter, opts.autoUsageHeadline)
 					parsed.Usage(opts.autoUsageWriter)
 					parsed.settings.autoUsageExitFn()
-					panic("Auto usage termination callback function did not terminated the application")
-				},
 
-				validFn:      func(v string) error { return nil },
+					fmt.Fprintln(opts.autoUsageWriter, "WARNING: the provided termination function did not terminated the application")
+					os.Exit(0)
+					return nil
+				},
+				setValueFn:   func(_ *string) error { return nil },
 				getDefaultFn: func() (string, error) { return "false", nil },
 				redactFn:     func(s string) string { return s },
 			}
