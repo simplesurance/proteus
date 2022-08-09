@@ -23,10 +23,7 @@ func main() {
 		Port   uint16
 	}{}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
-		cfgflags.New(),
-		cfgenv.New("CFG"),
-	))
+	parsed, err := proteus.MustParse(&params)
 	if err != nil {
 		parsed.ErrUsage(os.Stderr, err)
 		os.Exit(1)
@@ -45,8 +42,8 @@ CFG__SERVER=b CFG__PORT=42 go run *.go
 # Output: Server: b:42
 ```
 
-When the same parameter is provided by two providers, the one listed first
-in `proteus.WithSources()` has priority.
+In the default configuration, as shown above, command-line flags have priority
+over environment variables.
 
 ### Sets of Parameters
 
@@ -62,10 +59,7 @@ func main() {
 		DB   dbParams
 	}{}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
-		cfgflags.New(),
-		cfgenv.New("CFG"),
-	))
+	parsed, err := proteus.MustParse(&params)
 	if err != nil {
 		parsed.ErrUsage(os.Stderr, err)
 		os.Exit(1)
@@ -99,11 +93,11 @@ type dbParams struct {
 
 ```bash
 CFG__DB__SERVER=localhost go run *.go \
-  db \ 
+  db \
     -database library \
     -user sa \
     -pwd sa \
-  http \  
+  http \
     -bind_port 5432 \
     -pwd secret-token
 
@@ -131,10 +125,7 @@ func main() {
 		Port:    8080,
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
-		cfgflags.New(),
-		cfgenv.New("CFG"),
-	))
+	parsed, err := proteus.MustParse(&params)
 	if err != nil {
 		parsed.ErrUsage(os.Stderr, err)
 		os.Exit(1)
@@ -180,10 +171,7 @@ func main() {
 		},
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithSources(
-		cfgflags.New(),
-		cfgenv.New("CFG"),
-	))
+	parsed, err := proteus.MustParse(&params)
 	if err != nil {
 		parsed.ErrUsage(os.Stderr, err)
 		os.Exit(1)
@@ -214,11 +202,7 @@ func main() {
 	}
 
 	parsed, err := proteus.MustParse(&params,
-		proteus.WithAutoUsage(os.Stderr, "Demo App", func() { os.Exit(0) }),
-		proteus.WithSources(
-			cfgflags.New(),
-			cfgenv.New("CFG"),
-		))
+		proteus.WithAutoUsage(os.Stderr, "Demo App", func() { os.Exit(0) }))
 	if err != nil {
 		parsed.ErrUsage(os.Stderr, err)
 		os.Exit(1)
@@ -246,33 +230,39 @@ func defaultDBParams() dbParams {
 go run main.go --help
 
 # Output:
-# Demo App
-# Syntax:
-# ./main \
-#     <-environment (dev|stg|prd)> \
-#     <-port uint16> \
+# app: Multiple errors:
+# - "environment": parameter is required but was not specified
+# - "port": parameter is required but was not specified
+# - "database.password": parameter is required but was not specified
+# - "database.user": parameter is required but was not specified
+#
+#
+# Usage:
+# app \
 #     [-help] \
+#     -environment <dev|stg|prd> \
+#     -port <uint16> \
 #   database \
-#     <-password string> \
-#     <-user string> \
-#     [-port uint16] \
-#     [-server string]
-# 
+#     -password <string> \
+#     -user <string> \
+#     [-port <uint16>] \
+#     [-server <string>]
+#
 # PARAMETERS
-# - environment:(dev|stg|prd)
+# - help default=false
+#   Prints information about how to use this application
+# - environment
 #   Which environment the app is running on
-# - port:uint16
-# - help:bool default=false
-#   Display usage instructions
-# 
+# - port
+#
 # PARAMETER SET: DATABASE
-# - password:string
+# - password
 #   Password for authentication
-# - user:string
+# - user
 #   Username for authentication
-# - port:uint16 default=5432
+# - port default=5432
 #   TCP port number of the database server
-# - server:string default=localhost
+# - server default=localhost
 #   Name of the database server
 ```
 
