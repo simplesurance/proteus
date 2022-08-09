@@ -7,7 +7,8 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// flatWalk allows visiting all fields of a struct, including embedded values.
+// flatWalk visits all fields of a struct, including embedded values,
+// collect information about found fields and returns it.
 func flatWalk(setName, setPath string, val reflect.Value) (map[string]fieldAndValue, error) {
 	foundFields := map[string]fieldAndValue{}
 

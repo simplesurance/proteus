@@ -389,6 +389,9 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 	return paramName, ret, fmt.Errorf("struct member %q is unsupported", paramName)
 }
 
+// addSpecialFlags register flags like "--help" that the caller might have
+// requested, that can only be provided by command-line flags, and that have
+// to be handled in a special way by proteus.
 func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 	var violations types.ErrViolations
 
@@ -401,7 +404,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 			violations = append(violations, types.Violation{
 				ParamName: helpFlagName,
 				Path:      conflictingParam.path,
-				Message:   "The help parameter cannot be used with the auto-usage is requested",
+				Message:   "The help parameter cannot be used when the auto-usage is requested",
 			})
 		} else {
 			appConfig[""].fields[helpFlagName] = paramSetField{
