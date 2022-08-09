@@ -6,19 +6,32 @@ package types
 //
 // XTypes types must not only implement this interface, but also implement a
 // function "Value() T", that takes no parameters and returns an arbitrary
-// type T. This method will be used by the application to read the value
-// of the parameter, and used by the configuration package to show how to
-// use the package. Example of a Value function:
+// type T. Example of a Value function:
 //
-//     Value() *url.URL
+//	Value() *url.URL
 //
 // The returned value, when not immutable, will be a copy of the parameter
 // value. The value returned by this function might change, if its value
 // was read from a source that supports updating values without application
 // restart, like file.
 //
-// Values of this type may optionally implement the Redactor or the
-// TypeDescriber inteface (or both).
+// When proteus responds to "--help" by generating usage instructions it
+// will tell the user the _type_ of the parameter. For an XType, by default
+// the return type of Value() is used. For example:
+//
+//	params: struct{
+//		Server *xtype.URL
+//	}{}
+//
+// will be displayed on help usage as:
+//
+//	-server <url.URL>
+//
+// Because Value() for xtype.URL returns an URL. If this is not appropriated
+// in some use-case, the xtype may also implement TypeDescriber, that allow
+// providing an arbitrary string to be used.
+//
+// XTypes may optionally implement the Redactor interface.
 type XType interface {
 	UnmarshalParam(*string) error
 
@@ -40,10 +53,24 @@ type Redactor interface {
 	RedactValue(string) string
 }
 
-// TypeDescriber describes what kind of value must be provided by
-// a configuration parameter. Implementation is optional, and should only
-// be implemented when the default generated usage information is not
-// appropriated.
+// TypeDescriber overrides the "type" of a parameter when showing usage
+// information to the user. When an xtype does not implement this interface,
+// the return type of the Value() function is used. Implementing this function
+// allows providing an arbitrary string to be used instead. One example is the
+// xtype.OneOf type:
+//
+//	params := struct{
+//			Region *xtypes.OneOf
+//		}{
+//			Region: &xtypes.OneOf{
+//				Choices: []string{"EU", "US"},
+//			},
+//	}
+//
+// The OneOf xtype implement this method to show the actual list of choices,
+// instead of just showing "string":
+//
+//	-region <EU|US>
 type TypeDescriber interface {
 	DescribeType() string
 }
