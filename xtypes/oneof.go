@@ -97,14 +97,13 @@ func (d *OneOf) GetDefaultValue() (string, error) {
 // DescribeType changes how usage information is shown for parameters
 // of this type. Instead of showing the default:
 //
-//     {paramName}:string
+//	{paramName}:string
 //
 // this method will make it show as
 //
-//     {paramName}:(option1|option2|...)
-//
+//	{paramName}:(option1|option2|...)
 func (d *OneOf) DescribeType() string {
-	return "(" + strings.Join(d.Choices, "|") + ")"
+	return "" + strings.Join(d.Choices, "|")
 }
 
 func (d *OneOf) compare(v1, v2 string) bool {
@@ -112,5 +111,5 @@ func (d *OneOf) compare(v1, v2 string) bool {
 		return strings.EqualFold(v1, v2)
 	}
 
-	return strings.EqualFold(v1, v2)
+	return v1 == v2
 }

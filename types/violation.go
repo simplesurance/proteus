@@ -34,7 +34,7 @@ func (e ErrViolations) Error() string {
 	})
 
 	ret := strings.Builder{}
-	ret.WriteString("Multiple violations:\n")
+	ret.WriteString("Multiple errors:\n")
 	for _, violation := range e {
 		vStr := violation.String()
 		ret.WriteString("- " + vStr + "\n")
@@ -66,25 +66,19 @@ type Violation struct {
 }
 
 func (v Violation) String() string {
-	sb := strings.Builder{}
+	var id string
 
 	if v.Path != "" {
-		sb.WriteString(fmt.Sprintf("path=%q ", v.Path))
+		id = v.Path
+	} else if v.SetName != "" {
+		id = v.SetName + "." + v.ParamName
+	} else {
+		id = v.ParamName
 	}
 
-	if v.ParamName != "" {
-		sb.WriteString(fmt.Sprintf("param=%q ", v.ParamName))
+	if v.ValueFn == nil {
+		return fmt.Sprintf("%q: %s", id, v.Message)
 	}
 
-	if v.SetName != "" {
-		sb.WriteString(fmt.Sprintf("set=%q ", v.SetName))
-	}
-
-	if v.ValueFn != nil {
-		sb.WriteString(fmt.Sprintf("value=%q ", v.ValueFn()))
-	}
-
-	sb.WriteString(v.Message)
-
-	return strings.TrimSpace(sb.String())
+	return fmt.Sprintf("%q: %s (have %q)", id, v.Message, v.ValueFn())
 }

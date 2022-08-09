@@ -8,6 +8,9 @@ import (
 	"strings"
 
 	"github.com/simplesurance/proteus/internal/consts"
+	"github.com/simplesurance/proteus/sources"
+	"github.com/simplesurance/proteus/sources/cfgenv"
+	"github.com/simplesurance/proteus/sources/cfgflags"
 	"github.com/simplesurance/proteus/types"
 )
 
@@ -126,7 +129,14 @@ import (
 // allowing the creation of useful error messages.
 func MustParse(config any, options ...Option) (*Parsed, error) {
 	opts := settings{
-		loggerFn: func(msg string, depth int) {}, // nop logger
+		providers: []sources.Provider{
+			cfgflags.New(),
+			cfgenv.New("CFG"),
+		},
+		loggerFn:          func(msg string, depth int) {}, // nop logger
+		autoUsageExitFn:   func() { os.Exit(0) },
+		autoUsageHeadline: "Application Usage Help",
+		autoUsageWriter:   os.Stdout,
 	}
 	opts.apply(options...)
 
@@ -136,7 +146,7 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 	}
 
 	if len(opts.providers) == 0 {
-		panic("NO CONFIGURATION PROVIDER WAS PROVIDED")
+		panic(fmt.Errorf("NO CONFIGURATION PROVIDER WAS PROVIDED"))
 	}
 
 	ret := Parsed{
@@ -329,7 +339,7 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 			ret.secret = true
 		default:
 			return paramName, ret, fmt.Errorf(
-				"option '%s' is invalid for tag 'param' in '%s'",
+				"option '%s' is invalid for tag 'param' in '%s'; valid options are optional|secret",
 				tagOption,
 				tagParam)
 		}

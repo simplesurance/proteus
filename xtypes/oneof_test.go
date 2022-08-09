@@ -1,7 +1,6 @@
 package xtypes_test
 
 import (
-	"bytes"
 	"errors"
 	"testing"
 
@@ -39,35 +38,12 @@ func TestOneOfValid(t *testing.T) {
 		},
 	})
 
-	parsed, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
+	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
 	require.NoError(t, err)
-
-	buffer := bytes.Buffer{}
-	parsed.Dump(&buffer)
-
-	require.Equal(t, `Parameter values:
-- normal = "do"
-- secret = "<redacted>"
-`, buffer.String())
 
 	require.Equal(t, "do", params.Normal.Value())
 	require.Equal(t, "re", params.Secret.Value())
 	require.Equal(t, "mi", params.Optional.Value())
-
-	buffer.Reset()
-	parsed.Usage(&buffer)
-	require.Equal(t, `Syntax:
-./xtypes.test \
-    <-normal (do|re|mi)> \
-    <-secret (do|re|mi)> \
-    [-optional (do|re|mi)]
-
-PARAMETERS
-- normal:(do|re|mi)
-- secret:(do|re|mi)
-- optional:(do|re|mi) default=mi
-
-`, buffer.String())
 }
 
 func TestOneOfInvalid(t *testing.T) {

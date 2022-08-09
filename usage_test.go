@@ -20,14 +20,17 @@ func ExampleParsed_Usage() {
 	parsed.Usage(os.Stdout)
 
 	// Output:
-	// Syntax:
-	// ./proteus.test \
-	//     <-server string> \
-	//     [-port uint16]
+	// Usage:
+	// proteus.test \
+	//     [-help] \
+	//     -server <string> \
+	//     [-port <uint16>]
 	//
 	// PARAMETERS
-	// - server:string
+	// - help default=false
+	//   Prints information about how to use this application
+	// - server
 	//   Name of the server to connect
-	// - port:uint16 default=5432
+	// - port default=5432
 	//   Port to conect
 }

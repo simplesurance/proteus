@@ -28,7 +28,7 @@ func (s *settings) apply(options ...Option) {
 // WithProviders specifies from where the configuration should be read.
 func WithProviders(s ...sources.Provider) Option {
 	return func(p *settings) {
-		p.providers = append(p.providers, s...)
+		p.providers = s
 	}
 }
 

@@ -1,4 +1,4 @@
-name: Go
+name: Static Analysis
 
 on:
   push:

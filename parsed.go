@@ -34,9 +34,8 @@ func (p *Parsed) Usage(w io.Writer) {
 // usage text, it also outputs the validation errors with the supplied
 // parameters. It does not terminate the application.
 func (p *Parsed) ErrUsage(w io.Writer, err error) {
-	fmt.Fprintln(w, "Invalid configuration parameters for application")
 	if err != nil {
-		fmt.Fprintln(w, err.Error())
+		fmt.Fprintf(w, "%s: %s\n\n", binaryName(), err.Error())
 	}
 
 	p.usage(w, err)
@@ -50,7 +49,7 @@ func (p *Parsed) usage(w io.Writer, err error) {
 
 	sort.Strings(setKeys)
 
-	details := strings.Builder{}
+	paramDoc := strings.Builder{}
 	cmdLine := []string{binaryName()}
 
 	lastSet := ""
@@ -66,13 +65,13 @@ func (p *Parsed) usage(w io.Writer, err error) {
 			continue
 		}
 
-		fmt.Fprintln(&details)
+		fmt.Fprintln(&paramDoc)
 		if setName == "" {
-			fmt.Fprintln(&details, "PARAMETERS")
+			fmt.Fprintln(&paramDoc, "PARAMETERS")
 		} else {
-			fmt.Fprintln(&details, "PARAMETER SET: "+strings.ToUpper(setName))
+			fmt.Fprintln(&paramDoc, "PARAMETER SET: "+strings.ToUpper(setName))
 			if set.desc != "" {
-				fmt.Fprintln(&details, set.desc)
+				fmt.Fprintln(&paramDoc, set.desc)
 			}
 		}
 
@@ -86,7 +85,12 @@ func (p *Parsed) usage(w io.Writer, err error) {
 			p1 := set.fields[paramNames[i]]
 			p2 := set.fields[paramNames[j]]
 
-			// mandatory fields first
+			// special parameters come first
+			if p1.isSpecial != p2.isSpecial {
+				return p1.isSpecial
+			}
+
+			// then mandatory fields
 			if p1.optional != p2.optional {
 				return p2.optional
 			}
@@ -101,40 +105,44 @@ func (p *Parsed) usage(w io.Writer, err error) {
 
 			cmdLine = append(cmdLine, "  "+formatCmdLineParam(name, field))
 
-			opts := []string{fmt.Sprintf("- %s:%s", name, field.typ)}
+			opts := []string{fmt.Sprintf("- %s", name)}
+			if field.secret {
+				opts = append(opts, "secret")
+			}
+
 			if field.optional {
 				opts = append(opts, "default="+field.redactedDefaultValue())
 			}
 
-			fmt.Fprintln(&details, strings.Join(opts, " "))
+			fmt.Fprintln(&paramDoc, strings.Join(opts, " "))
 
 			if field.desc != "" {
-				fmt.Fprintf(&details, "  %s\n", field.desc)
+				fmt.Fprintf(&paramDoc, "  %s\n", field.desc)
 			}
 		}
 	}
 
-	fmt.Fprintln(w, "Syntax:")
+	fmt.Fprintln(w, "Usage:")
 	fmt.Fprintln(w, strings.Join(cmdLine, " \\\n  "))
-	fmt.Fprintln(w, details.String())
+	fmt.Fprintln(w, paramDoc.String())
 }
 
 func binaryName() string {
 	_, ret := filepath.Split(os.Args[0])
-	return "./" + ret
+	return ret
 }
 
 func formatCmdLineParam(cmd string, field paramSetField) string {
-	content := fmt.Sprintf("-%s %s", cmd, field.typ)
+	content := fmt.Sprintf("-%s <%s>", cmd, field.typ)
 	if field.boolean {
-		content = "-" + cmd
+		content = fmt.Sprintf("-%s", cmd)
 	}
 
 	if field.optional {
 		return fmt.Sprintf("[%s]", content)
 	}
 
-	return fmt.Sprintf("<%s>", content)
+	return content
 }
 
 // Dump prints the names and values of the parameters.
@@ -257,8 +265,7 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 				{
 					SetName:   setName,
 					ParamName: paramName,
-					ValueFn:   param.redactedValue(nil),
-					Message:   "Required",
+					Message:   "parameter is required but was not specified",
 				},
 			})
 		}

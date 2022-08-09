@@ -124,3 +124,17 @@ func defaultURLValidateFn(u *url.URL) error {
 
 	return nil
 }
+
+// MustParseURL parses the URL. If parsing fails, it panics. It is being
+// provided to make it straightforward to provide a default value to
+// xtypes.URL, since the "url" package has only a parsing function that returns
+// URL and error, resulting in cumbersome code, specially when needing to
+// specify multiple default URLs.
+func MustParseURL(v string) *url.URL {
+	ret, err := url.Parse(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return ret
+}
