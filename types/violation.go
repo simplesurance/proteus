@@ -34,7 +34,7 @@ func (e ErrViolations) Error() string {
 	})
 
 	ret := strings.Builder{}
-	ret.WriteString("Multiple errors:\n")
+	ret.WriteString("multiple invalid parameters:\n")
 	for _, violation := range e {
 		vStr := violation.String()
 		ret.WriteString("- " + vStr + "\n")
@@ -80,5 +80,5 @@ func (v Violation) String() string {
 		return fmt.Sprintf("%q: %s", id, v.Message)
 	}
 
-	return fmt.Sprintf("%q: %s (have %q)", id, v.Message, v.ValueFn())
+	return fmt.Sprintf("%q: %s (parsing %q)", id, v.Message, v.ValueFn())
 }

@@ -10,13 +10,13 @@ import (
 type Option func(*settings)
 
 type settings struct {
-	providers []sources.Provider
-	loggerFn  Logger
+	providers   []sources.Provider
+	loggerFn    Logger
+	onelineDesc string
 
 	// auto-usage (aka --help)
-	autoUsageExitFn   func()
-	autoUsageHeadline string
-	autoUsageWriter   io.Writer
+	autoUsageExitFn func()
+	autoUsageWriter io.Writer
 }
 
 func (s *settings) apply(options ...Option) {
@@ -32,13 +32,21 @@ func WithProviders(s ...sources.Provider) Option {
 	}
 }
 
-// WithAutoUsage will parse the `--help` command-line flag. If it is present,
-// will show usage and exit using the provided exitFn. If the exitFn is nil
-// it exists with os.Exit(0).
-func WithAutoUsage(writer io.Writer, headline string, exitFn func()) Option {
+// WithShortDescription allows specifying a short one-line description for
+// the application. Is used when generating help information.
+func WithShortDescription(oneline string) Option {
+	return func(p *settings) {
+		p.onelineDesc = oneline
+	}
+}
+
+// WithAutoUsage will change how the --help parameter is parsed, allowing to
+// specify a writer, for the usage information and an "exit function".
+// If not specified, proteus will use stdout for writer and will use
+// os.Exit(0) as exit function.
+func WithAutoUsage(writer io.Writer, exitFn func()) Option {
 	return func(p *settings) {
 		p.autoUsageExitFn = exitFn
-		p.autoUsageHeadline = headline
 		p.autoUsageWriter = writer
 	}
 }

@@ -94,14 +94,18 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 func configAsInt(fieldData *paramSetField, val reflect.Value, bitSize int) {
 	fieldData.validFn = func(str string) error {
 		_, err := strconv.ParseInt(str, 10, bitSize)
-		return err
+		if err != nil {
+			return badNumberErr(true, bitSize)
+		}
+
+		return nil
 	}
 
 	fieldData.setValueFn = func(str *string) error {
 		panicOnNil(str)
 		v, err := strconv.ParseInt(*str, 10, bitSize)
 		if err != nil {
-			return err
+			return badNumberErr(true, bitSize)
 		}
 
 		val.SetInt(v)
@@ -116,14 +120,18 @@ func configAsInt(fieldData *paramSetField, val reflect.Value, bitSize int) {
 func configAsUint(fieldData *paramSetField, val reflect.Value, bitSize int) {
 	fieldData.validFn = func(str string) error {
 		_, err := strconv.ParseUint(str, 10, bitSize)
-		return err
+		if err != nil {
+			return badNumberErr(false, bitSize)
+		}
+
+		return nil
 	}
 
 	fieldData.setValueFn = func(str *string) error {
 		panicOnNil(str)
 		v, err := strconv.ParseUint(*str, 10, bitSize)
 		if err != nil {
-			return err
+			return badNumberErr(false, bitSize)
 		}
 
 		val.SetUint(v)
@@ -133,6 +141,22 @@ func configAsUint(fieldData *paramSetField, val reflect.Value, bitSize int) {
 	fieldData.getDefaultFn = func() (string, error) {
 		return strconv.FormatUint(val.Uint(), 10), nil
 	}
+}
+
+// badNumberErr generates an error that does not include the value being
+// parsed, to avoid leaking it, in case the parameter is marked as secret.
+func badNumberErr(signed bool, bits int) error {
+	prefix := ""
+	if !signed {
+		prefix = "u"
+	}
+
+	suffix := ""
+	if bits > 0 {
+		suffix = strconv.Itoa(bits)
+	}
+
+	return fmt.Errorf("invalid value for an %sint%s", prefix, suffix)
 }
 
 func panicOnNil(v *string) {

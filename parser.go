@@ -133,10 +133,9 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 			cfgflags.New(),
 			cfgenv.New("CFG"),
 		},
-		loggerFn:          func(msg string, depth int) {}, // nop logger
-		autoUsageExitFn:   func() { os.Exit(0) },
-		autoUsageHeadline: "Application Usage Help",
-		autoUsageWriter:   os.Stdout,
+		loggerFn:        func(msg string, depth int) {}, // nop logger
+		autoUsageExitFn: func() { os.Exit(0) },
+		autoUsageWriter: os.Stdout,
 	}
 	opts.apply(options...)
 
@@ -359,7 +358,12 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 	}
 
 	// try to configure it as an "xtype"
-	if isXType(structField.Type) {
+	ok, err := isXType(structField.Type)
+	if err != nil {
+		return paramName, ret, err
+	}
+
+	if ok {
 		if fieldVal.IsNil() {
 			fieldVal.Set(reflect.New(fieldVal.Type().Elem()))
 		}
@@ -428,7 +432,6 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 				// try to determine if the value is valid. Generate the
 				// help usage instead of terminate the application.
 				validFn: func(v string) error {
-					fmt.Fprintln(opts.autoUsageWriter, opts.autoUsageHeadline)
 					parsed.Usage(opts.autoUsageWriter)
 					parsed.settings.autoUsageExitFn()
 
@@ -454,7 +457,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 
 func describeType(val reflect.Value) string {
 	t := val.Type()
-	if isXType(t) {
+	if ok, _ := isXType(t); ok {
 		return describeXType(val)
 	}
 

@@ -24,24 +24,18 @@ type Parsed struct {
 	values        []types.ParamValues
 }
 
-// Usage print usage information to the provider writer.
-func (p *Parsed) Usage(w io.Writer) {
-	p.usage(w, nil)
-}
-
 // ErrUsage is a specialized version of Usage(), that is intended
 // to be used when configuration parsing failed. Additionally to the
 // usage text, it also outputs the validation errors with the supplied
 // parameters. It does not terminate the application.
 func (p *Parsed) ErrUsage(w io.Writer, err error) {
-	if err != nil {
-		fmt.Fprintf(w, "%s: %s\n\n", binaryName(), err.Error())
-	}
+	fmt.Fprintf(w, "%s: %s\n", binaryName(), err.Error())
 
-	p.usage(w, err)
+	p.Usage(w)
 }
 
-func (p *Parsed) usage(w io.Writer, err error) {
+// Usage print usage information to the provider writer.
+func (p *Parsed) Usage(w io.Writer) {
 	setKeys := make([]string, 0, len(p.inferedConfig))
 	for k := range p.inferedConfig {
 		setKeys = append(setKeys, k)
@@ -122,8 +116,14 @@ func (p *Parsed) usage(w io.Writer, err error) {
 		}
 	}
 
+	if p.settings.onelineDesc != "" {
+		fmt.Fprintln(w, p.settings.onelineDesc)
+		fmt.Fprintln(w)
+	}
+
 	fmt.Fprintln(w, "Usage:")
 	fmt.Fprintln(w, strings.Join(cmdLine, " \\\n  "))
+
 	fmt.Fprintln(w, paramDoc.String())
 }
 

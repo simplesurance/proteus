@@ -1,6 +1,7 @@
 package proteus
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/simplesurance/proteus/types"
@@ -10,25 +11,29 @@ const invalidValue = "<invalid>"
 
 // isXType will return true is the type supports hot-reloading the
 // parameter value. This is determine by:
-// - the value belonging to a type that implements the unmarshaller interface
-// - the value belonging to a type that implements a method Value() T, where
-//   the type T any supported value.
-func isXType(ty reflect.Type) bool {
+//   - the value belonging to a type that implements the unmarshaller interface
+//   - the value belonging to a type that implements a method Value() T, where
+//     the type T any supported value.
+func isXType(ty reflect.Type) (bool, error) {
 	tyUnmarshaler := reflect.TypeOf((*types.XType)(nil)).Elem()
 	if !ty.AssignableTo(tyUnmarshaler) {
-		return false
+		return false, nil
 	}
 
 	valueMethod, ok := ty.MethodByName("Value")
 	if !ok {
-		return false
+		return false, fmt.Errorf("provided XType is incorrectly implemented: missing 'Value() T' method")
 	}
 
 	if valueMethod.Type.NumIn() != 1 {
-		return false
+		return false, fmt.Errorf("provided XType is incorrectly implemented: 'Value() method must have 0 input parameters")
 	}
 
-	return true
+	if valueMethod.Type.NumOut() != 1 {
+		return false, fmt.Errorf("provided XType is incorrectly implemented: 'Value() method must return 1 value")
+	}
+
+	return true, nil
 }
 
 // describeXType creates a short description of what kind of parameter
