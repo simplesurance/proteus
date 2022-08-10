@@ -147,8 +147,6 @@ go run *.go -token my-secret-token
 
 The token is marked as a secret, which is important to avoid leaking its value.
 
-// TODO: link with doc for `Dump()`, `Usage()` and `ErrUsage()`.
-
 ### XTypes
 
 _XTypes_ are types provided by _proteus_ to handle complex types and to provide
@@ -266,4 +264,3 @@ go run main.go --help
 #   Name of the database server
 ```
 
-// TODO: Document `Dump()`, `Usage()` and `ErrUsage()`.
