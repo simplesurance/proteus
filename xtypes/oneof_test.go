@@ -76,3 +76,70 @@ func TestOneOfInvalid(t *testing.T) {
 	require.Equal(t, "v", violation.ParamName)
 	t.Logf("got error, as expected: %v", violation)
 }
+
+func TestOneOfBadDefault(t *testing.T) {
+	invoked := false
+
+	params := struct {
+		P *xtypes.OneOf `param:",optional"`
+	}{
+		P: &xtypes.OneOf{
+			DefaultValue: "fa",
+			Choices:      []string{"do", "re", "mi"},
+			UpdateFn:     func(s string) { invoked = true },
+		},
+	}
+
+	testProvider := cfgtest.New(types.ParamValues{
+		"": map[string]string{},
+	})
+
+	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
+	require.NoError(t, err)
+	require.False(t, invoked, "UpdateFn was not invoked")
+	t.Log(params.P.Value())
+}
+
+func TestOneOfCallbackProvidedParameter(t *testing.T) {
+	invoked := false
+
+	params := struct {
+		P *xtypes.OneOf
+	}{
+		P: &xtypes.OneOf{
+			Choices:  []string{"do", "re", "mi"},
+			UpdateFn: func(s string) { invoked = true },
+		},
+	}
+
+	testProvider := cfgtest.New(types.ParamValues{
+		"": map[string]string{
+			"p": "do",
+		},
+	})
+
+	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
+	require.NoError(t, err)
+	require.True(t, invoked, "UpdateFn was not invoked")
+}
+
+func TestOneOfCallbackNotProvidedParameter(t *testing.T) {
+	invoked := false
+
+	params := struct {
+		P *xtypes.OneOf `param:",optional"`
+	}{
+		P: &xtypes.OneOf{
+			Choices:  []string{"do", "re", "mi"},
+			UpdateFn: func(s string) { invoked = true },
+		},
+	}
+
+	testProvider := cfgtest.New(types.ParamValues{
+		"": map[string]string{},
+	})
+
+	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
+	require.NoError(t, err)
+	require.False(t, invoked, "UpdateFn was not invoked")
+}

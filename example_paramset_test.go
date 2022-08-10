@@ -5,8 +5,6 @@ import (
 	"os"
 
 	"github.com/simplesurance/proteus"
-	"github.com/simplesurance/proteus/sources/cfgenv"
-	"github.com/simplesurance/proteus/sources/cfgflags"
 )
 
 func Example_paramSet() {
@@ -15,10 +13,7 @@ func Example_paramSet() {
 		DB   dbParams
 	}{}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
-		cfgflags.New(),
-		cfgenv.New("CFG"),
-	))
+	parsed, err := proteus.MustParse(&params)
 	if err != nil {
 		parsed.ErrUsage(os.Stderr, err)
 		os.Exit(1)

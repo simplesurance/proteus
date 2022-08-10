@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/simplesurance/proteus/slices"
+	"github.com/simplesurance/proteus/internal/slices"
 	"github.com/simplesurance/proteus/types"
 )
 
@@ -73,7 +73,7 @@ func (d *OneOf) Value() string {
 // effects.
 func (d *OneOf) ValueValid(s string) error {
 	if !slices.Contains(d.Choices, s, d.compare) {
-		return fmt.Errorf("value must be one of (%s)",
+		return fmt.Errorf("value must be one of %s",
 			strings.Join(d.Choices, "|"))
 	}
 
@@ -89,7 +89,7 @@ func (d *OneOf) GetDefaultValue() (string, error) {
 		}
 	}
 
-	return d.DefaultValue, fmt.Errorf(
+	return "", fmt.Errorf(
 		"provided default value is not on the list of choices [%s]",
 		strings.Join(d.Choices, ", "))
 }
