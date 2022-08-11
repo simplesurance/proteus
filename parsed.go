@@ -287,7 +287,8 @@ func (p *Parsed) refresh(force bool) {
 	for setName, set := range p.inferedConfig {
 		for paramName, paramConfig := range set.fields {
 			if !paramConfig.isXtype && !force {
-				p.settings.loggerFn(fmt.Sprintf("Not updating %s.%s", setName, paramName), 1)
+				p.settings.loggerFn(fmt.Sprintf("Not updating %s.%s (xtype: %t, force: %t)", setName, paramName, paramConfig.isXtype, force), 1)
+				continue
 			}
 
 			value := p.desiredValue(setName, paramName)

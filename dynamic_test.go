@@ -48,7 +48,9 @@ func TestDynamic(t *testing.T) {
 		"": map[string]string{"x": wantedValues[0]},
 	})
 
-	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
+	parsed, err := proteus.MustParse(&params,
+		proteus.WithLogger(cfgtest.LoggerFor(t)),
+		proteus.WithProviders(provider))
 	if err != nil {
 		buffer := bytes.Buffer{}
 		parsed.ErrUsage(&buffer, err)

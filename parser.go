@@ -376,6 +376,8 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 	}
 
 	if ok {
+		ret.isXtype = true
+
 		if fieldVal.IsNil() {
 			fieldVal.Set(reflect.New(fieldVal.Type().Elem()))
 		}
