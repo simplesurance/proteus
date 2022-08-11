@@ -1,6 +1,7 @@
 # Proteus
 ![Coverage](https://img.shields.io/badge/Coverage-58.5%25-yellow)
 [![Go Report Card](https://goreportcard.com/badge/github.com/simplesurance/proteus)](https://goreportcard.com/report/github.com/simplesurance/proteus)
+[![Github tag](https://badgen.net/github/tag/simplesurance/proteus)](https://github.com/simplesurance/proteus/tags/)
 
 ## About
 
