@@ -129,24 +129,6 @@ func (p *Parsed) Usage(w io.Writer) {
 	fmt.Fprintln(w, paramDoc.String())
 }
 
-func binaryName() string {
-	_, ret := filepath.Split(os.Args[0])
-	return ret
-}
-
-func formatCmdLineParam(cmd string, field paramSetField) string {
-	content := fmt.Sprintf("-%s <%s>", cmd, field.typ)
-	if field.boolean {
-		content = fmt.Sprintf("-%s", cmd)
-	}
-
-	if field.optional {
-		return fmt.Sprintf("[%s]", content)
-	}
-
-	return content
-}
-
 // Dump prints the names and values of the parameters.
 func (p *Parsed) Dump(w io.Writer) {
 	p.protected.valuesMutex.Lock()
@@ -168,22 +150,18 @@ func (p *Parsed) Dump(w io.Writer) {
 	}
 }
 
-func mapKeysSorted[T any](v map[string]T) []string {
-	ret := make([]string, 0, len(v))
-	for k := range v {
-		ret = append(ret, k)
-	}
-
-	sort.Strings(ret)
-	return ret
-}
-
 // Valid allows determining if the provided application parameters are valid.
 func (p *Parsed) Valid() error {
 	p.protected.valuesMutex.Lock()
 	defer p.protected.valuesMutex.Unlock()
 
 	return p.valid()
+}
+
+func (p *Parsed) Stop() {
+	for _, p := range p.settings.providers {
+		p.Stop()
+	}
 }
 
 // valid determines if the desired parameters are valid.
@@ -350,4 +328,32 @@ func (p *Parsed) desiredValue(setName, paramName string) *string {
 	}
 
 	return nil
+}
+
+func binaryName() string {
+	_, ret := filepath.Split(os.Args[0])
+	return ret
+}
+
+func formatCmdLineParam(cmd string, field paramSetField) string {
+	content := fmt.Sprintf("-%s <%s>", cmd, field.typ)
+	if field.boolean {
+		content = fmt.Sprintf("-%s", cmd)
+	}
+
+	if field.optional {
+		return fmt.Sprintf("[%s]", content)
+	}
+
+	return content
+}
+
+func mapKeysSorted[T any](v map[string]T) []string {
+	ret := make([]string, 0, len(v))
+	for k := range v {
+		ret = append(ret, k)
+	}
+
+	sort.Strings(ret)
+	return ret
 }

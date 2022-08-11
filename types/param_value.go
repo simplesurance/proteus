@@ -19,3 +19,13 @@ func (p ParamValues) Copy() ParamValues {
 
 	return ret
 }
+
+func (p ParamValues) Get(setName, paramName string) *string {
+	if set, ok := p[setName]; ok {
+		if ret, ok := set[paramName]; ok {
+			return &ret
+		}
+	}
+
+	return nil
+}

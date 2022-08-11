@@ -34,6 +34,24 @@ func (u *updater) Log(msg string) {
 	u.parsed.settings.loggerFn(u.providerName+": "+msg, 2)
 }
 
+func (u *updater) Peek(setName, paramName string) (*string, error) {
+	u.parsed.protected.valuesMutex.Lock()
+	defer u.parsed.protected.valuesMutex.Unlock()
+
+	if u.providerIndex == 0 {
+		return nil, fmt.Errorf("first provider can't peek values from providers before it")
+	}
+
+	for _, provData := range u.parsed.protected.values[:u.providerIndex] {
+		ret := provData.Get(setName, paramName)
+		if ret != nil {
+			return ret, nil
+		}
+	}
+
+	return nil, nil
+}
+
 func (u *updater) update(v types.ParamValues, refresh bool) {
 	u.mustBeOnValidIDs(v)
 	u.validateValues(v)

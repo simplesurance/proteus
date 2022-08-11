@@ -41,6 +41,11 @@ type Updater interface {
 	// All log entries will be identified with the class name of the
 	// provider.
 	Log(string)
+
+	// Peek reads the raw parameter value from the providers registered
+	// before the provider associated to this updater. This allow one
+	// provider to be configured by values received by other providers.
+	Peek(setName, paramName string) (*string, error)
 }
 
 // Parameters contains information about what parameters the application
