@@ -2,6 +2,8 @@
 package cfgtest
 
 import (
+	"sync"
+
 	"github.com/simplesurance/proteus/sources"
 	"github.com/simplesurance/proteus/types"
 )
@@ -11,13 +13,22 @@ import (
 // object can be used to change the values, allowing for tests on parameters
 // that change without reloading.
 func New(values types.ParamValues) *TestProvider {
-	return &TestProvider{values: values}
+	ret := &TestProvider{}
+
+	ret.protected.mutex.Lock()
+	ret.protected.values = values.Copy()
+	ret.protected.mutex.Unlock()
+
+	return ret
 }
 
 // TestProvider is an application configuration provider designed to be used on
 // tests.
 type TestProvider struct {
-	values  types.ParamValues
+	protected struct {
+		mutex  sync.Mutex
+		values types.ParamValues
+	}
 	updater sources.Updater
 }
 
@@ -32,15 +43,22 @@ func (r *TestProvider) IsCommandLineFlag() bool {
 // Update changes a value on the test provider, allowing for test on
 // hot-reloading of parameters.
 func (r *TestProvider) Update(setid, id string, value string) {
-	set, ok := r.values[setid]
-	if !ok {
-		set = map[string]string{}
-		r.values[setid] = set
-	}
+	valuesCopy := func() types.ParamValues {
+		r.protected.mutex.Lock()
+		defer r.protected.mutex.Unlock()
 
-	set[id] = value
+		set, ok := r.protected.values[setid]
+		if !ok {
+			set = map[string]string{}
+			r.protected.values[setid] = set
+		}
 
-	r.updater.Update(r.values)
+		set[id] = value
+
+		return r.protected.values.Copy()
+	}()
+
+	r.updater.Update(valuesCopy)
 }
 
 // Stop does nothing.
@@ -55,5 +73,9 @@ func (r *TestProvider) Watch(
 	updater sources.Updater,
 ) (initial types.ParamValues, err error) {
 	r.updater = updater
-	return r.values, nil
+
+	r.protected.mutex.Lock()
+	defer r.protected.mutex.Unlock()
+
+	return r.protected.values.Copy(), nil
 }

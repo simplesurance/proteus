@@ -151,19 +151,24 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 	ret := Parsed{
 		settings:      opts,
 		inferedConfig: appConfig,
-		values:        make([]types.ParamValues, len(opts.providers)),
 	}
+
+	ret.protected.values = make([]types.ParamValues, len(opts.providers))
 
 	if err := addSpecialFlags(appConfig, &ret, opts); err != nil {
 		return &ret, err
 	}
 
 	// start watching each configuration item on each provider
+	updaters := make([]*updater, len(opts.providers))
 	for ix, provider := range opts.providers {
 		updater := &updater{
-			parsed:        &ret,
-			providerIndex: ix,
-			providerName:  fmt.Sprintf("%T", provider)}
+			parsed:         &ret,
+			providerIndex:  ix,
+			providerName:   fmt.Sprintf("%T", provider),
+			updatesEnabled: make(chan struct{})}
+
+		updaters[ix] = updater
 
 		initial, err := provider.Watch(
 			appConfig.paramInfo(provider.IsCommandLineFlag()),
@@ -172,8 +177,8 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 			return &ret, err
 		}
 
-		// callbacks are not invoked on initial load, but only when
-		// values are updated
+		// use the updater to store the initial values; do NOT update the
+		// "config" struct yet
 		updater.update(initial, false)
 	}
 
@@ -181,7 +186,14 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 		return &ret, err
 	}
 
-	ret.refresh(true) // update xtypes and standard parameters
+	// send values back to the user by updating the fields on the
+	// "config" parameter
+	ret.refresh(true)
+
+	// allow all sources to provide updates
+	for _, updater := range updaters {
+		close(updater.updatesEnabled)
+	}
 
 	return &ret, nil
 }

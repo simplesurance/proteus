@@ -20,8 +20,10 @@ const redactedPlaceholder = "<redacted>"
 type Parsed struct {
 	settings      settings
 	inferedConfig config
-	valuesMutex   sync.Mutex
-	values        []types.ParamValues
+	protected     struct {
+		valuesMutex sync.Mutex
+		values      []types.ParamValues
+	}
 }
 
 // ErrUsage is a specialized version of Usage(), that is intended
@@ -147,6 +149,9 @@ func formatCmdLineParam(cmd string, field paramSetField) string {
 
 // Dump prints the names and values of the parameters.
 func (p *Parsed) Dump(w io.Writer) {
+	p.protected.valuesMutex.Lock()
+	defer p.protected.valuesMutex.Unlock()
+
 	fmt.Fprintf(w, "Parameter values:\n")
 	merged := p.mergeValues()
 	for _, setName := range mapKeysSorted(merged) {
@@ -175,8 +180,8 @@ func mapKeysSorted[T any](v map[string]T) []string {
 
 // Valid allows determining if the provided application parameters are valid.
 func (p *Parsed) Valid() error {
-	p.valuesMutex.Lock()
-	defer p.valuesMutex.Unlock()
+	p.protected.valuesMutex.Lock()
+	defer p.protected.valuesMutex.Unlock()
 
 	return p.valid()
 }
@@ -224,10 +229,11 @@ func (p *Parsed) valid() error {
 
 // mergeValues compute the configuration from all providers, taking provider
 // priority into consideration.
-// Caller must hold the mutex.
+//
+// Caller must hold the protected.mutex.
 func (p *Parsed) mergeValues() types.ParamValues {
 	ret := types.ParamValues{}
-	for _, providerValues := range p.values {
+	for _, providerValues := range p.protected.values {
 		for setName, set := range providerValues {
 			retSet, ok := ret[setName]
 			if !ok {
@@ -290,10 +296,9 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 
 // refresh reads the available parameter values that are stored on "parsed"
 // and use them to update the configuration struct.
+//
+// Caller must hold the mutex.
 func (p *Parsed) refresh(force bool) {
-	p.valuesMutex.Lock()
-	defer p.valuesMutex.Unlock()
-
 	if err := p.valid(); err != nil {
 		p.settings.loggerFn(fmt.Sprintf(
 			"Refusing to update values because configuration is invalid: %v",
@@ -333,7 +338,7 @@ func (p *Parsed) refresh(force bool) {
 // Caller must hold the mutex.
 func (p *Parsed) desiredValue(setName, paramName string) *string {
 	// the first provider with a value wins
-	for _, providerData := range p.values {
+	for _, providerData := range p.protected.values {
 		set, ok := providerData[setName]
 		if !ok {
 			continue

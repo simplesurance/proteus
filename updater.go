@@ -17,11 +17,16 @@ type updater struct {
 	// slice, this is the providerIndex for that slice.
 	providerIndex int
 	providerName  string
+
+	updatesEnabled chan struct{} // close this to allow updates
 }
 
 var _ sources.Updater = &updater{}
 
 func (u *updater) Update(v types.ParamValues) {
+	// this is for proteus to delay updates until everything gets initialized
+	<-u.updatesEnabled
+
 	u.update(v, true)
 }
 
@@ -33,9 +38,10 @@ func (u *updater) update(v types.ParamValues, refresh bool) {
 	u.mustBeOnValidIDs(v)
 	u.validateValues(v)
 
-	u.parsed.valuesMutex.Lock()
-	u.parsed.values[u.providerIndex] = v
-	u.parsed.valuesMutex.Unlock()
+	u.parsed.protected.valuesMutex.Lock()
+	defer u.parsed.protected.valuesMutex.Unlock()
+
+	u.parsed.protected.values[u.providerIndex] = v
 
 	if refresh {
 		u.parsed.refresh(false) // update only dynamic parameters
