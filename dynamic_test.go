@@ -30,6 +30,7 @@ func TestDynamic(t *testing.T) {
 
 	params := struct {
 		X *xtypes.String
+		Y string
 	}{
 		X: &xtypes.String{
 			UpdateFn: func(s string) {
@@ -45,7 +46,10 @@ func TestDynamic(t *testing.T) {
 	}
 
 	provider := cfgtest.New(types.ParamValues{
-		"": map[string]string{"x": wantedValues[0]},
+		"": map[string]string{
+			"x": wantedValues[0],
+			"y": wantedValues[0],
+		},
 	})
 
 	parsed, err := proteus.MustParse(&params,
@@ -60,6 +64,7 @@ func TestDynamic(t *testing.T) {
 	defer parsed.Stop()
 
 	require.Equal(t, wantedValues[0], params.X.Value())
+	require.Equal(t, wantedValues[0], params.Y)
 
 	time.Sleep(time.Second)
 
@@ -75,6 +80,10 @@ func TestDynamic(t *testing.T) {
 
 		start := time.Now()
 		for i := 0; ; i++ {
+			if params.Y != wantedValues[0] {
+				t.Fatalf("non-xtype value has unexpected value %q", params.Y)
+			}
+
 			if params.X.Value() == value {
 				t.Logf("Got new value with i=%d", i)
 				break
