@@ -115,3 +115,8 @@ func (t *testUpdater) Log(msg string) {
 	t.t.Helper()
 	t.t.Log(msg)
 }
+
+func (t *testUpdater) Peek(setName, paramName string) (*string, error) {
+	// environment variables do not read values from another providers
+	return nil, nil
+}
