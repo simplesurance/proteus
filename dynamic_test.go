@@ -55,6 +55,8 @@ func TestDynamic(t *testing.T) {
 		t.Error(buffer.String())
 	}
 
+	defer parsed.Stop()
+
 	require.Equal(t, wantedValues[0], params.X.Value())
 
 	time.Sleep(time.Second)
