@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/simplesurance/proteus/types"
 	"golang.org/x/exp/constraints"
+
+	"github.com/simplesurance/proteus/types"
 )
 
 // Integer is an XType for integers.
@@ -76,19 +77,19 @@ func parseInt[T constraints.Integer](v string) (ret T, _ error) {
 	switch reflect.TypeOf(ret).Kind() {
 	case reflect.Int:
 		n, err := strconv.ParseInt(v, 10, 0)
-		return T(int(n)), err
+		return T(n), err
 	case reflect.Int8:
 		n, err := strconv.ParseInt(v, 10, 8)
-		return T(int8(n)), err
+		return T(n), err
 	case reflect.Int16:
 		n, err := strconv.ParseInt(v, 10, 16)
-		return T(int16(n)), err
+		return T(n), err
 	case reflect.Int32:
 		n, err := strconv.ParseInt(v, 10, 32)
-		return T(int32(n)), err
+		return T(n), err
 	case reflect.Int64:
 		n, err := strconv.ParseInt(v, 10, 64)
-		return T(int64(n)), err
+		return T(n), err
 
 	case reflect.Uint:
 		n, err := strconv.ParseUint(v, 10, 0)
@@ -104,7 +105,7 @@ func parseInt[T constraints.Integer](v string) (ret T, _ error) {
 		return T(uint32(n)), err
 	case reflect.Uint64:
 		n, err := strconv.ParseUint(v, 10, 64)
-		return T(uint64(n)), err
+		return T(n), err
 	}
 
 	panic(fmt.Errorf("unsupported type %T", ret))

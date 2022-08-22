@@ -37,7 +37,7 @@ func isXType(ty reflect.Type) (bool, error) {
 }
 
 // describeXType creates a short description of what kind of parameter
-// this refers to. It will be infered from the return types of Value(),
+// this refers to. It will be inferred from the return types of Value(),
 // and the type may override this by implementing the types.XTypeDescriber
 // interface.
 func describeXType(val reflect.Value) string {
