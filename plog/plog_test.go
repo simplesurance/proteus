@@ -5,8 +5,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/simplesurance/proteus/plog"
 	"github.com/stretchr/testify/require"
+
+	"github.com/simplesurance/proteus/plog"
 )
 
 func TestMarshaling(t *testing.T) {
