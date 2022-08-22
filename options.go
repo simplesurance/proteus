@@ -65,3 +65,13 @@ func WithLogger(l plog.Logger) Option {
 		p.loggerFn = l
 	}
 }
+
+// WithPrintfLogger use the printf-style logFn function as logger.
+func WithPrintfLogger(logFn func(format string, v ...any)) Option {
+	return func(p *settings) {
+		p.loggerFn = func(e plog.Entry) {
+			logFn("%-5s %s:%d %s\n",
+				e.Severity, e.Caller.File, e.Caller.LineNumber, e.Message)
+		}
+	}
+}
