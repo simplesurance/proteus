@@ -1,7 +1,9 @@
 all: check
 
 check:
-	staticcheck ./...
+	golangci-lint run ./...
+
+test:
 	go test --race ./...
 
 cover:
