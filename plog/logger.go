@@ -11,7 +11,7 @@ func (logger Logger) D(msg string, opts ...Option) {
 	logger(Entry{
 		Severity: SevDebug,
 		Message:  msg,
-		Caller:   ReadCaller(o.skipCallers),
+		Caller:   ReadCaller(o.skipCallers, false),
 	})
 }
 
@@ -21,7 +21,7 @@ func (logger Logger) I(msg string, opts ...Option) {
 	logger(Entry{
 		Severity: SevInfo,
 		Message:  msg,
-		Caller:   ReadCaller(o.skipCallers),
+		Caller:   ReadCaller(o.skipCallers, false),
 	})
 }
 
@@ -31,6 +31,6 @@ func (logger Logger) E(msg string, opts ...Option) {
 	logger(Entry{
 		Severity: SevInfo,
 		Message:  msg,
-		Caller:   ReadCaller(o.skipCallers),
+		Caller:   ReadCaller(o.skipCallers, true),
 	})
 }
