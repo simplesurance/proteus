@@ -20,26 +20,32 @@ type Entry struct {
 // ReadCaller reads information about the caller, skipping the provided
 // number of callers. Skip=1 means the immediate caller, skip=2 is the
 // caller of the caller, and so on.
-func ReadCaller(skip int) *Caller {
+//
+// The stack trace can optionally be included. Since this is an expensive
+// operation, this should not be liberally used.
+func ReadCaller(skip int, withStackTrace bool) *Caller {
 	_, file, line, ok := runtime.Caller(skip)
 	if !ok {
 		return nil
 	}
 
-	buffer := make([]byte, 4*1024)
-	read := runtime.Stack(buffer, false)
-	stacktrace := string(buffer[:read])
-
-	return &Caller{
+	ret := &Caller{
 		File:       file,
 		LineNumber: line,
-		Stacktrace: stacktrace,
 	}
+
+	if withStackTrace {
+		buffer := make([]byte, 4*1024)
+		read := runtime.Stack(buffer, false)
+		ret.Stacktrace = string(buffer[:read])
+	}
+
+	return ret
 }
 
 // Caller holds information about the caller who created the log message.
 type Caller struct {
 	File       string `json:"file,omitempty"`
-	LineNumber int    `json:"line:omitempty"`
+	LineNumber int    `json:"line,omitempty"`
 	Stacktrace string `json:"stacktrace,omitempty"`
 }

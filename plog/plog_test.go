@@ -15,7 +15,7 @@ func TestMarshaling(t *testing.T) {
 		{
 			Severity: plog.SevDebug,
 			Message:  "debug",
-			Caller:   plog.ReadCaller(0),
+			Caller:   plog.ReadCaller(0, false),
 		},
 		{
 			Message: "smallest",
