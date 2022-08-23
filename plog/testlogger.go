@@ -11,6 +11,11 @@ func TestLogger(t *testing.T) Logger {
 		t.Helper()
 
 		j, _ := json.MarshalIndent(e, "", "  ")
-		t.Logf("%s", j)
+
+		if e.Severity == SevError {
+			t.Errorf("test produced a log entry with error severity: %s", j)
+		} else {
+			t.Logf("%s", j)
+		}
 	}
 }
