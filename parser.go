@@ -392,6 +392,7 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 		}
 
 		ret.boolean = describeType(fieldVal) == "bool"
+		ret.typ = describeType(fieldVal)
 
 		ret.validFn = toXType(fieldVal).ValueValid
 		ret.setValueFn = toXType(fieldVal).UnmarshalParam
@@ -407,8 +408,6 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 
 		return paramName, ret, nil
 	}
-
-	ret.typ = describeType(fieldVal)
 
 	// if is a struct, assume it to be a parameter set
 	if fieldVal.Kind() == reflect.Struct {
