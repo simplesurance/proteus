@@ -176,12 +176,7 @@ func (p *Parsed) valid() error {
 		for paramName, paramConfig := range set.fields {
 			// must validate when a value is present and when it
 			// is missing (value=nil)
-			var value *string
-			if setValues, ok := mergedValues[setName]; ok {
-				if paramValue, ok := setValues[paramName]; ok {
-					value = &paramValue
-				}
-			}
+			value := mergedValues.Get(setName, paramName)
 
 			if err := p.validValue(setName, paramName, value); err != nil {
 				var validViol types.ErrViolations
@@ -247,13 +242,10 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 
 	if value == nil {
 		if !param.optional {
-			return types.ErrViolations([]types.Violation{
-				{
-					SetName:   setName,
-					ParamName: paramName,
-					Message:   "parameter is required but was not specified",
-				},
-			})
+			return types.ErrViolations([]types.Violation{{
+				SetName:   setName,
+				ParamName: paramName,
+				Message:   "parameter is required but was not specified"}})
 		}
 
 		return nil
@@ -261,14 +253,11 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 
 	err := param.validFn(*value)
 	if err != nil {
-		return types.ErrViolations([]types.Violation{
-			{
-				SetName:   setName,
-				ParamName: paramName,
-				ValueFn:   param.redactedValue(value),
-				Message:   err.Error(),
-			},
-		})
+		return types.ErrViolations([]types.Violation{{
+			SetName:   setName,
+			ParamName: paramName,
+			ValueFn:   param.redactedValue(value),
+			Message:   err.Error()}})
 	}
 
 	return nil
