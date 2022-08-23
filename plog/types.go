@@ -26,14 +26,20 @@ func ReadCaller(skip int) *Caller {
 		return nil
 	}
 
+	buffer := make([]byte, 4*1024)
+	read := runtime.Stack(buffer, false)
+	stacktrace := string(buffer[:read])
+
 	return &Caller{
 		File:       file,
 		LineNumber: line,
+		Stacktrace: stacktrace,
 	}
 }
 
 // Caller holds information about the caller who created the log message.
 type Caller struct {
-	File       string
-	LineNumber int
+	File       string `json:"file,omitempty"`
+	LineNumber int    `json:"line:omitempty"`
+	Stacktrace string `json:"stacktrace,omitempty"`
 }
