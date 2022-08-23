@@ -2,7 +2,6 @@ package proteus_test
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/simplesurance/proteus"
@@ -16,7 +15,7 @@ func Example() {
 		Port: 5432,
 	}
 
-	parsed, err := proteus.MustParse(&params, proteus.WithPrintfLogger(log.Printf))
+	parsed, err := proteus.MustParse(&params)
 	if err != nil {
 		parsed.ErrUsage(os.Stderr, err)
 		os.Exit(1)
