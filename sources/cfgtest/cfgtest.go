@@ -42,7 +42,7 @@ func (r *TestProvider) IsCommandLineFlag() bool {
 
 // Update changes a value on the test provider, allowing for test on
 // hot-reloading of parameters.
-func (r *TestProvider) Update(setid, id string, value string) {
+func (r *TestProvider) Update(setid, id string, value *string) {
 	valuesCopy := func() types.ParamValues {
 		r.protected.mutex.Lock()
 		defer r.protected.mutex.Unlock()
@@ -53,7 +53,14 @@ func (r *TestProvider) Update(setid, id string, value string) {
 			r.protected.values[setid] = set
 		}
 
-		set[id] = value
+		if value == nil {
+			delete(set, id)
+			if len(set) == 0 {
+				delete(r.protected.values, setid)
+			}
+		} else {
+			set[id] = *value
+		}
 
 		return r.protected.values.Copy()
 	}()

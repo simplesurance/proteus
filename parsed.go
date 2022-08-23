@@ -166,6 +166,39 @@ func (p *Parsed) Stop() {
 	}
 }
 
+// validateAllXtypesDefaultValues test if all optional parameters specified
+// using an xtype have a valid default value.
+func (p *Parsed) validateAllXtypesDefaultValues() error {
+	violations := types.ErrViolations{}
+
+	for _, set := range p.inferedConfig {
+		for _, param := range set.fields {
+			if !param.isXtype || !param.optional {
+				continue
+			}
+
+			if _, err := param.getDefaultFn(); err != nil {
+				viol := types.ErrViolations{}
+				if errors.Is(err, viol) {
+					violations = append(violations, viol...)
+					continue
+				}
+
+				violations = append(violations, types.Violation{
+					Path:    param.path,
+					Message: err.Error(),
+				})
+			}
+		}
+	}
+
+	if len(violations) > 0 {
+		return violations
+	}
+
+	return nil
+}
+
 // valid determines if the desired parameters are valid.
 // Caller must hold the mutex.
 func (p *Parsed) valid() error {
@@ -299,9 +332,14 @@ func (p *Parsed) refresh(force bool) {
 
 			err := paramConfig.setValueFn(value)
 			if err != nil {
+				id := paramName
+				if setName != "" {
+					id = setName + "." + paramName
+				}
+
 				p.settings.loggerFn.E(fmt.Sprintf(
-					"error updating %s.%s: %v",
-					setName, paramName, err))
+					"error updating %q on config struct element %q: %v, isnil:%t",
+					id, paramConfig.path, err, value == nil))
 			}
 		}
 	}

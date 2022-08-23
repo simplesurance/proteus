@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/plog"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
 	"github.com/simplesurance/proteus/xtypes"
@@ -79,15 +80,12 @@ func TestOneOfInvalid(t *testing.T) {
 }
 
 func TestOneOfBadDefault(t *testing.T) {
-	invoked := false
-
 	params := struct {
 		P *xtypes.OneOf `param:",optional"`
 	}{
 		P: &xtypes.OneOf{
 			DefaultValue: "fa",
 			Choices:      []string{"do", "re", "mi"},
-			UpdateFn:     func(s string) { invoked = true },
 		},
 	}
 
@@ -95,10 +93,10 @@ func TestOneOfBadDefault(t *testing.T) {
 		"": map[string]string{},
 	})
 
-	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
-	require.NoError(t, err)
-	require.False(t, invoked, "UpdateFn was not invoked")
-	t.Log(params.P.Value())
+	require.Panics(t, func() {
+		_, _ = proteus.MustParse(&params, proteus.WithProviders(testProvider))
+	})
+
 }
 
 func TestOneOfCallbackProvidedParameter(t *testing.T) {
@@ -124,23 +122,36 @@ func TestOneOfCallbackProvidedParameter(t *testing.T) {
 	require.True(t, invoked, "UpdateFn was not invoked")
 }
 
-func TestOneOfCallbackNotProvidedParameter(t *testing.T) {
-	invoked := false
+func TestOneOfRevertToDefault(t *testing.T) {
+	var setUpdatedValue *string
 
 	params := struct {
 		P *xtypes.OneOf `param:",optional"`
 	}{
 		P: &xtypes.OneOf{
-			Choices:  []string{"do", "re", "mi"},
-			UpdateFn: func(s string) { invoked = true },
+			Choices:      []string{"do", "re", "mi"},
+			DefaultValue: "do",
+			UpdateFn: func(s string) {
+				setUpdatedValue = &s
+			},
 		},
 	}
 
 	testProvider := cfgtest.New(types.ParamValues{
-		"": map[string]string{},
+		"": map[string]string{"p": "mi"},
 	})
 
-	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
+	_, err := proteus.MustParse(&params,
+		proteus.WithLogger(plog.TestLogger(t)),
+		proteus.WithProviders(testProvider))
 	require.NoError(t, err)
-	require.False(t, invoked, "UpdateFn was not invoked")
+
+	require.NotNil(t, setUpdatedValue)
+	require.Equal(t, "mi", *setUpdatedValue)
+	require.Equal(t, "mi", params.P.Value())
+
+	testProvider.Update("", "p", nil)
+	require.NotNil(t, setUpdatedValue)
+	require.Equal(t, "do", *setUpdatedValue)
+	require.Equal(t, "do", params.P.Value())
 }

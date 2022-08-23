@@ -29,7 +29,7 @@ func flatWalk(setName, setPath string, val reflect.Value) (map[string]fieldAndVa
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Type().Field(i)
 			fieldValue := val.Field(i)
-			path := path + "/" + field.Name
+			path := strings.TrimPrefix(path+"/"+field.Name, "/")
 
 			if field.Type.Kind() == reflect.Struct && field.Anonymous {
 				walker(fieldValue, path)

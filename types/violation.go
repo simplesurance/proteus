@@ -44,6 +44,13 @@ func (e ErrViolations) Error() string {
 }
 
 // Violation holds a single violation of the requirements for parameters.
+//
+// Callers should either provide "Path" or provide Set and Param names:
+//
+//   - Path is preferable when the violation is caused by an incorrect
+//     parameter struct, like for example using an unsupported type
+//   - SetName+ParamName should be used when the parameter struct itself is
+//     correct, so the problem lies somewhere else.
 type Violation struct {
 	// Path identifies the location of a violation on the configuration
 	// struct.
@@ -67,18 +74,22 @@ type Violation struct {
 
 func (v Violation) String() string {
 	var id string
+	var idtype string
 
 	if v.Path != "" {
+		idtype = "configuration struct element"
 		id = v.Path
 	} else if v.SetName != "" {
+		idtype = "parameter"
 		id = v.SetName + "." + v.ParamName
 	} else {
+		idtype = "parameter"
 		id = v.ParamName
 	}
 
 	if v.ValueFn == nil {
-		return fmt.Sprintf("%q: %s", id, v.Message)
+		return fmt.Sprintf("%s %q: %s", idtype, id, v.Message)
 	}
 
-	return fmt.Sprintf("%q: %s (parsing %q)", id, v.Message, v.ValueFn())
+	return fmt.Sprintf("parameter %q: %s (parsing %q)", id, v.Message, v.ValueFn())
 }
