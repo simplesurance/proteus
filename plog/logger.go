@@ -29,7 +29,7 @@ func (logger Logger) I(msg string, opts ...Option) {
 func (logger Logger) E(msg string, opts ...Option) {
 	o := applyOptions(opts...)
 	logger(Entry{
-		Severity: SevInfo,
+		Severity: SevError,
 		Message:  msg,
 		Caller:   ReadCaller(o.skipCallers),
 	})

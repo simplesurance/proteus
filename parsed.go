@@ -166,6 +166,39 @@ func (p *Parsed) Stop() {
 	}
 }
 
+// validateAllXtypesDefaultValues tests if all optional parameters specified
+// using an xtype have a valid default value.
+func (p *Parsed) validateXTypeOptionalDefaults() error {
+	violations := types.ErrViolations{}
+
+	for _, set := range p.inferedConfig {
+		for _, param := range set.fields {
+			if !param.isXtype || !param.optional {
+				continue
+			}
+
+			if _, err := param.getDefaultFn(); err != nil {
+				viol := types.ErrViolations{}
+				if errors.Is(err, viol) {
+					violations = append(violations, viol...)
+					continue
+				}
+
+				violations = append(violations, types.Violation{
+					Path:    param.path,
+					Message: err.Error(),
+				})
+			}
+		}
+	}
+
+	if len(violations) > 0 {
+		return violations
+	}
+
+	return nil
+}
+
 // valid determines if the desired parameters are valid.
 // Caller must hold the mutex.
 func (p *Parsed) valid() error {
@@ -176,12 +209,7 @@ func (p *Parsed) valid() error {
 		for paramName, paramConfig := range set.fields {
 			// must validate when a value is present and when it
 			// is missing (value=nil)
-			var value *string
-			if setValues, ok := mergedValues[setName]; ok {
-				if paramValue, ok := setValues[paramName]; ok {
-					value = &paramValue
-				}
-			}
+			value := mergedValues.Get(setName, paramName)
 
 			if err := p.validValue(setName, paramName, value); err != nil {
 				var validViol types.ErrViolations
@@ -247,13 +275,10 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 
 	if value == nil {
 		if !param.optional {
-			return types.ErrViolations([]types.Violation{
-				{
-					SetName:   setName,
-					ParamName: paramName,
-					Message:   "parameter is required but was not specified",
-				},
-			})
+			return types.ErrViolations([]types.Violation{{
+				SetName:   setName,
+				ParamName: paramName,
+				Message:   "parameter is required but was not specified"}})
 		}
 
 		return nil
@@ -261,14 +286,11 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 
 	err := param.validFn(*value)
 	if err != nil {
-		return types.ErrViolations([]types.Violation{
-			{
-				SetName:   setName,
-				ParamName: paramName,
-				ValueFn:   param.redactedValue(value),
-				Message:   err.Error(),
-			},
-		})
+		return types.ErrViolations([]types.Violation{{
+			SetName:   setName,
+			ParamName: paramName,
+			ValueFn:   param.redactedValue(value),
+			Message:   err.Error()}})
 	}
 
 	return nil
@@ -310,9 +332,14 @@ func (p *Parsed) refresh(force bool) {
 
 			err := paramConfig.setValueFn(value)
 			if err != nil {
+				id := paramName
+				if setName != "" {
+					id = setName + "." + paramName
+				}
+
 				p.settings.loggerFn.E(fmt.Sprintf(
-					"error updating %s.%s: %v",
-					setName, paramName, err))
+					"error updating %q on config struct element %q: %v, isnil:%t",
+					id, paramConfig.path, err, value == nil))
 			}
 		}
 	}

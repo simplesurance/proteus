@@ -13,14 +13,32 @@ import (
 // OneOf is a parameter configuration that can hold a value from a list of
 // valid options. The list of options must be provided. An UpdateFn can be
 // provided to be notified about changes to the value.
+//
+// The list of choices is mandatory, and must be provided in the "Choices"
+// field.
+//
+// If the parameter is not optional it is mandatory to provide a default
+// value that matches one of the choices. For mandatory parameters, a
+// default value don't have to be provided, and is ignored.
+//
+// Example:
+//
+//	params := struct{
+//		Region: *xtypes.OneOf
+//	}{
+//		Region: &xtypes.OneOf{
+//			Choices:      []string{"EU", "US"},
+//			DefaultValue: "EU",
+//		},
+//	}
 type OneOf struct {
 	Choices      []string
 	DefaultValue string
 	IgnoreCase   bool
 	UpdateFn     func(string)
 	content      struct {
-		valueIx *int
-		mutex   sync.Mutex
+		value *string
+		mutex sync.Mutex
 	}
 }
 
@@ -30,24 +48,26 @@ var _ types.TypeDescriber = &OneOf{}
 // UnmarshalParam is a custom parser for a string parameter. This will always
 // run on brand new instance of string, so no synchronization is necessary.
 func (d *OneOf) UnmarshalParam(in *string) error {
-	var valueIxPtr *int
+	var newValue *string
 	if in != nil {
-		for ix, opt := range d.Choices {
+		ok := false
+		for _, opt := range d.Choices {
 			if d.compare(opt, *in) {
-				cpix := ix
-				valueIxPtr = &cpix
+				ok = true
+				cpin := *in
+				newValue = &cpin
 				break
 			}
 		}
-	}
 
-	if valueIxPtr == nil {
-		return errors.New("value must be one of: " +
-			strings.Join(d.Choices, "|"))
+		if !ok {
+			return errors.New("value must be one of: " +
+				strings.Join(d.Choices, "|"))
+		}
 	}
 
 	d.content.mutex.Lock()
-	d.content.valueIx = valueIxPtr
+	d.content.value = newValue
 	d.content.mutex.Unlock()
 
 	if d.UpdateFn != nil {
@@ -62,11 +82,11 @@ func (d *OneOf) Value() string {
 	d.content.mutex.Lock()
 	defer d.content.mutex.Unlock()
 
-	if d.content.valueIx == nil {
+	if d.content.value == nil {
 		return d.DefaultValue
 	}
 
-	return d.Choices[*d.content.valueIx]
+	return *d.content.value
 }
 
 // ValueValid test if the provided parameter value is valid. Has no side
@@ -90,8 +110,8 @@ func (d *OneOf) GetDefaultValue() (string, error) {
 	}
 
 	return "", fmt.Errorf(
-		"provided default value is not on the list of choices [%s]",
-		strings.Join(d.Choices, ", "))
+		"default value for OneOf is not in the list of choices [%s]",
+		strings.Join(d.Choices, "|"))
 }
 
 // DescribeType changes how usage information is shown for parameters

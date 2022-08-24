@@ -73,12 +73,14 @@ func TestDynamic(t *testing.T) {
 	for ix, value := range wantedValues[1:] {
 		t.Logf("Done waiting for callback; requesting dynamic value update with value %q", value)
 
-		// Update the value is assert that the new value is visible. The test code
-		// here will update the value in one routine while reading it on a busy
-		// loop to allow the race detector to find concurrency issues.
-		go func() {
-			provider.Update("", "x", value)
-		}()
+		// Change the value in one routine and assert that the new value is
+		// visible on another. The read happens on a busy loop. This is to
+		// maximize the chance of the go race detector to find issues with the
+		// code.
+		go func(value string) {
+			time.Sleep(100 * time.Millisecond)
+			provider.Update("", "x", &value)
+		}(value)
 
 		start := time.Now()
 		for i := 0; ; i++ {

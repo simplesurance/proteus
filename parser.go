@@ -160,6 +160,12 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 		return &ret, err
 	}
 
+	// all optional xtypes must have valid default values
+	err = ret.validateXTypeOptionalDefaults()
+	if err != nil {
+		panic(fmt.Errorf("INVALID USAGE OF XTYPE: %v", err))
+	}
+
 	// start watching each configuration item on each provider
 	updaters := make([]*updater, len(opts.providers))
 	for ix, provider := range opts.providers {
@@ -251,6 +257,8 @@ func inferConfigFromValue(value any, opts settings) (config, error) {
 					name, consts.ParamNameRE)})
 		}
 
+		tag.path = member.Path
+
 		if tag.paramSet {
 			// is a set or parameters
 			d, err := parseParamSet(name, member.Path, member.value)
@@ -339,7 +347,6 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 	paramName = tagParamParts[0]
 
 	ret := paramSetField{
-		typ:  describeType(fieldVal),
 		desc: structField.Tag.Get("param_desc"),
 	}
 
@@ -367,6 +374,7 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 	// try to configure it as a "basic type"
 	err := configStandardCallbacks(&ret, fieldVal)
 	if err == nil {
+		ret.typ = describeType(fieldVal)
 		return paramName, ret, nil
 	}
 
@@ -384,6 +392,7 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 		}
 
 		ret.boolean = describeType(fieldVal) == "bool"
+		ret.typ = describeType(fieldVal)
 
 		ret.validFn = toXType(fieldVal).ValueValid
 		ret.setValueFn = toXType(fieldVal).UnmarshalParam
