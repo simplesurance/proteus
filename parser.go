@@ -161,7 +161,7 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 	}
 
 	// all optional xtypes must have valid default values
-	err = ret.validateAllXtypesDefaultValues()
+	err = ret.validateXTypeOptionalDefaults()
 	if err != nil {
 		panic(fmt.Errorf("INVALID USAGE OF XTYPE: %v", err))
 	}

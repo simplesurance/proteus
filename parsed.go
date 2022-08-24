@@ -168,7 +168,7 @@ func (p *Parsed) Stop() {
 
 // validateAllXtypesDefaultValues test if all optional parameters specified
 // using an xtype have a valid default value.
-func (p *Parsed) validateAllXtypesDefaultValues() error {
+func (p *Parsed) validateXTypeOptionalDefaults() error {
 	violations := types.ErrViolations{}
 
 	for _, set := range p.inferedConfig {
