@@ -110,7 +110,7 @@ func (d *OneOf) GetDefaultValue() (string, error) {
 	}
 
 	return "", fmt.Errorf(
-		"default value for OneOf is not on the list of choices [%s]",
+		"default value for OneOf is not in the list of choices [%s]",
 		strings.Join(d.Choices, "|"))
 }
 
