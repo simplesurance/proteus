@@ -2,11 +2,11 @@ package xtypes_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/plog"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
@@ -41,11 +41,11 @@ func TestOneOfValid(t *testing.T) {
 	})
 
 	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
-	require.Equal(t, "do", params.Normal.Value())
-	require.Equal(t, "re", params.Secret.Value())
-	require.Equal(t, "mi", params.Optional.Value())
+	assert.Equal(t, "do", params.Normal.Value())
+	assert.Equal(t, "re", params.Secret.Value())
+	assert.Equal(t, "mi", params.Optional.Value())
 }
 
 func TestOneOfInvalid(t *testing.T) {
@@ -66,16 +66,17 @@ func TestOneOfInvalid(t *testing.T) {
 	})
 
 	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
-	require.Error(t, err)
+	assert.ErrorNow(t, err)
 
 	violations := types.ErrViolations{}
-	require.True(t, errors.As(err, &violations))
+	assert.TrueNow(t, errors.As(err, &violations), fmt.Sprintf(
+		"Returned error should be types.ErrViolations, but is %T", err))
 
-	require.Equal(t, 1, len(violations))
+	assert.EqualNow(t, 1, len(violations))
 
 	violation := violations[0]
-	require.Equal(t, "", violation.SetName)
-	require.Equal(t, "v", violation.ParamName)
+	assert.Equal(t, "", violation.SetName)
+	assert.Equal(t, "v", violation.ParamName)
 	t.Logf("got error, as expected: %v", violation)
 }
 
@@ -93,7 +94,7 @@ func TestOneOfBadDefault(t *testing.T) {
 		"": map[string]string{},
 	})
 
-	require.Panics(t, func() {
+	assert.PanicsNow(t, func() {
 		_, _ = proteus.MustParse(&params, proteus.WithProviders(testProvider))
 	})
 
@@ -118,8 +119,8 @@ func TestOneOfCallbackProvidedParameter(t *testing.T) {
 	})
 
 	_, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
-	require.NoError(t, err)
-	require.True(t, invoked, "UpdateFn was not invoked")
+	assert.NoErrorNow(t, err)
+	assert.True(t, invoked, "UpdateFn was not invoked")
 }
 
 func TestOneOfRevertToDefault(t *testing.T) {
@@ -144,14 +145,14 @@ func TestOneOfRevertToDefault(t *testing.T) {
 	_, err := proteus.MustParse(&params,
 		proteus.WithLogger(plog.TestLogger(t)),
 		proteus.WithProviders(testProvider))
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
-	require.NotNil(t, setUpdatedValue)
-	require.Equal(t, "mi", *setUpdatedValue)
-	require.Equal(t, "mi", params.P.Value())
+	assert.NotNilNow(t, setUpdatedValue)
+	assert.Equal(t, "mi", *setUpdatedValue)
+	assert.Equal(t, "mi", params.P.Value())
 
 	testProvider.Update("", "p", nil)
-	require.NotNil(t, setUpdatedValue)
-	require.Equal(t, "do", *setUpdatedValue)
-	require.Equal(t, "do", params.P.Value())
+	assert.NotNilNow(t, setUpdatedValue)
+	assert.Equal(t, "do", *setUpdatedValue)
+	assert.Equal(t, "do", params.P.Value())
 }

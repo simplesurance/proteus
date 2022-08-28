@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
 	"github.com/simplesurance/proteus/xtypes"
@@ -28,7 +27,7 @@ MC4CAQAwBQYDK2VwBCIEILeVMy9KxALhIuev5dTLmtb8u9weRofKqd+n7Vifb8G0
 	})
 
 	parsed, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
 	buffer := bytes.Buffer{}
 	parsed.Dump(&buffer)

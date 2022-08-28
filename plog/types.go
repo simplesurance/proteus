@@ -14,19 +14,19 @@ type Logger func(Entry)
 type Entry struct {
 	Severity Severity `json:"severity,omitempty"`
 	Message  string   `json:"message,omitempty"`
-	Caller   *Caller  `json:"caller,omitempty"`
+	Caller   Caller   `json:"caller,omitempty"`
 }
 
 // ReadCaller reads information about the caller, skipping the provided
 // number of callers. Skip=1 means the immediate caller, skip=2 is the
 // caller of the caller, and so on.
-func ReadCaller(skip int) *Caller {
+func ReadCaller(skip int) Caller {
 	_, file, line, ok := runtime.Caller(skip)
 	if !ok {
-		return nil
+		return Caller{}
 	}
 
-	return &Caller{
+	return Caller{
 		File:       file,
 		LineNumber: line,
 	}

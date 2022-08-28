@@ -7,9 +7,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
 	"github.com/simplesurance/proteus/xtypes"
@@ -30,7 +29,7 @@ func TestSignedInt(t *testing.T) {
 
 	parsed, err := proteus.MustParse(&params, proteus.WithProviders(
 		cfgtest.New(providedParameters)))
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
 	buffer := bytes.Buffer{}
 	parsed.Dump(&buffer)
@@ -44,6 +43,6 @@ func TestSignedInt(t *testing.T) {
 
 	t.Logf("%T %T", params.I8_1.Value(), params.I8_2.Value())
 
-	require.Equal(t, int8(127), x)
-	require.Equal(t, int8(-128), params.I8_2.Value())
+	assert.Equal(t, int8(127), x)
+	assert.Equal(t, int8(-128), params.I8_2.Value())
 }
