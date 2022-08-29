@@ -18,6 +18,9 @@ type settings struct {
 	// auto-usage (aka --help)
 	autoUsageExitFn func()
 	autoUsageWriter io.Writer
+
+	// dry-mode
+	autoDryModeFn func(*Parsed)
 }
 
 func (s *settings) apply(options ...Option) {
@@ -73,5 +76,32 @@ func WithPrintfLogger(logFn func(format string, v ...any)) Option {
 			logFn("%-5s %s:%d %s\n",
 				e.Severity, e.Caller.File, e.Caller.LineNumber, e.Message)
 		}
+	}
+}
+
+// WithDryMode add a special parameter "--dry-mode", that can only be provided
+// by command-line flags, and can be used to validate parameters without
+// executing the application. The provided callback function will be invoked
+// and will have access to the Parsed object, than can then be used to
+// print errors, dump variable values or exit with some status code.
+//
+// If the callback function does not exit, proteus will terminate the
+// application with 0 or 1, depending on the validation being successful or
+// not.
+//
+//	parsed, err := proteus.MustParse(&params,
+//		proteus.WithDryMode(func(parsed *proteus.Parsed) {
+//			if err := parsed.Valid(); err != nil {
+//				parsed.ErrUsage(os.Stdout, err)
+//				os.Exit(42)
+//			}
+//
+//			fmt.Println("The following parameters are found to be valid:")
+//			parsed.Dump(os.Stdout)
+//			os.Exit(0)
+//		}))
+func WithDryMode(f func(*Parsed)) Option {
+	return func(p *settings) {
+		p.autoDryModeFn = f
 	}
 }
