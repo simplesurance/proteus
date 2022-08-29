@@ -50,8 +50,8 @@ func Error(t testing.TB, err error) bool {
 	return false
 }
 
-// PanicsNow asserts that the provided value is an error, terminating
-// the test if this is not true.
+// PanicsNow asserts that the provided function panics, terminating the test
+// immediately if it doesn't.
 func PanicsNow(t testing.TB, f func()) {
 	t.Helper()
 

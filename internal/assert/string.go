@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// StringContains asserts that the small string contains the smaller. Returns
+// StringContains asserts that substr is within s. Returns
 // true if assertion passes.
 func StringContains(t testing.TB, s, substr string) bool {
 	t.Helper()
