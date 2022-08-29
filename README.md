@@ -16,7 +16,7 @@ guaranteed.
 ## How to Get
 
 ```bash
-go get github.com/simplesurance/proteus@v0.0.2
+go get github.com/simplesurance/proteus@latest
 ```
 
 ## How to Use
