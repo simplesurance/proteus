@@ -4,12 +4,13 @@
 package cfgenv_test
 
 import (
+	"encoding/json"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/plog"
 	"github.com/simplesurance/proteus/sources"
 	"github.com/simplesurance/proteus/sources/cfgenv"
@@ -23,24 +24,24 @@ func TestCfgEnv(t *testing.T) {
 		for _, v := range envCopy {
 			key, value, _ := strings.Cut(v, "=")
 			err := os.Setenv(key, value)
-			require.NoError(t, err)
+			assert.NoErrorNow(t, err)
 		}
 	}()
 
 	os.Clearenv()
-	require.NoError(t, os.Setenv("TEST__A", "1"))
-	require.NoError(t, os.Setenv("TEST__B", "2"))
-	require.NoError(t, os.Setenv("TEST__ENABLED_BOOL", "true"))
+	assert.NoErrorNow(t, os.Setenv("TEST__A", "1"))
+	assert.NoErrorNow(t, os.Setenv("TEST__B", "2"))
+	assert.NoErrorNow(t, os.Setenv("TEST__ENABLED_BOOL", "true"))
 
-	require.NoError(t, os.Setenv("TEST__PARAMSET1__A", "11"))
-	require.NoError(t, os.Setenv("TEST__PARAMSET1__B", "12"))
-	require.NoError(t, os.Setenv("TEST__PARAMSET1__ENABLED_BOOL", "true"))
+	assert.NoErrorNow(t, os.Setenv("TEST__PARAMSET1__A", "11"))
+	assert.NoErrorNow(t, os.Setenv("TEST__PARAMSET1__B", "12"))
+	assert.NoErrorNow(t, os.Setenv("TEST__PARAMSET1__ENABLED_BOOL", "true"))
 
-	require.NoError(t, os.Setenv("TEST__PARAMSET2__A", "21"))
-	require.NoError(t, os.Setenv("TEST__PARAMSET2__B", "22"))
-	require.NoError(t, os.Setenv("TEST__PARAMSET2__ENABLED_BOOL", "false"))
+	assert.NoErrorNow(t, os.Setenv("TEST__PARAMSET2__A", "21"))
+	assert.NoErrorNow(t, os.Setenv("TEST__PARAMSET2__B", "22"))
+	assert.NoErrorNow(t, os.Setenv("TEST__PARAMSET2__ENABLED_BOOL", "false"))
 
-	require.NoError(t, os.Setenv("MUST_IGNORE_THIS", "1"))
+	assert.NoErrorNow(t, os.Setenv("MUST_IGNORE_THIS", "1"))
 
 	paramSource := cfgenv.New("TEST")
 	values, err := paramSource.Watch(sources.Parameters{
@@ -54,9 +55,9 @@ func TestCfgEnv(t *testing.T) {
 			return strings.HasSuffix(paramName, "bool")
 		},
 	})
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
-	require.Equal(t, types.ParamValues{
+	want := types.ParamValues{
 		"": map[string]string{
 			"a":            "1",
 			"b":            "2",
@@ -72,7 +73,13 @@ func TestCfgEnv(t *testing.T) {
 			"b":            "22",
 			"enabled_bool": "false",
 		},
-	}, values)
+	}
+
+	if !reflect.DeepEqual(want, values) {
+		jhave, _ := json.MarshalIndent(values, "", " ")
+		jwant, _ := json.MarshalIndent(want, "", " ")
+		t.Errorf("Not the expected configuration.\nWANT\n%s\n\nHAVE\n%s", jwant, jhave)
+	}
 }
 
 func TestUnexpectedEnvVar(t *testing.T) {
@@ -81,12 +88,12 @@ func TestUnexpectedEnvVar(t *testing.T) {
 		os.Clearenv()
 		for _, v := range envCopy {
 			key, value, _ := strings.Cut(v, "=")
-			require.NoError(t, os.Setenv(key, value))
+			assert.NoErrorNow(t, os.Setenv(key, value))
 		}
 	}()
 
 	os.Clearenv()
-	require.NoError(t, os.Setenv("TEST__UNEXPECTED", "1"))
+	assert.NoErrorNow(t, os.Setenv("TEST__UNEXPECTED", "1"))
 
 	paramSource := cfgenv.New("TEST")
 	_, err := paramSource.Watch(sources.Parameters{
@@ -97,7 +104,7 @@ func TestUnexpectedEnvVar(t *testing.T) {
 			return false
 		},
 	})
-	require.Error(t, err)
+	assert.ErrorNow(t, err)
 }
 
 type testUpdater struct {

@@ -9,9 +9,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
 	"github.com/simplesurance/proteus/xtypes"
@@ -31,7 +30,7 @@ func TestSimpleURL(t *testing.T) {
 	})
 
 	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
 	buffer := bytes.Buffer{}
 	parsed.Dump(&buffer)
@@ -41,7 +40,7 @@ func TestSimpleURL(t *testing.T) {
 	parsed.Usage(&buffer)
 	t.Log("USAGE INFORMATION\n" + buffer.String())
 
-	require.Equal(t, fullURLString, params.URL.Value().String())
+	assert.Equal(t, fullURLString, params.URL.Value().String())
 }
 
 func TestDefaultURL(t *testing.T) {
@@ -59,7 +58,7 @@ func TestDefaultURL(t *testing.T) {
 	})
 
 	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
 	buffer := bytes.Buffer{}
 	parsed.Dump(&buffer)
@@ -69,7 +68,7 @@ func TestDefaultURL(t *testing.T) {
 	parsed.Usage(&buffer)
 	t.Log("USAGE INFORMATION\n" + buffer.String())
 
-	require.Equal(t, defaultURLString, params.URL.Value().String())
+	assert.EqualNow(t, defaultURLString, params.URL.Value().String())
 }
 
 func TestEmptyURL(t *testing.T) {
@@ -84,7 +83,7 @@ func TestEmptyURL(t *testing.T) {
 	})
 
 	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
 	buffer := bytes.Buffer{}
 	parsed.Dump(&buffer)
@@ -94,7 +93,7 @@ func TestEmptyURL(t *testing.T) {
 	parsed.Usage(&buffer)
 	t.Log("USAGE INFORMATION\n" + buffer.String())
 
-	require.Equal(t, "", params.URL.Value().String())
+	assert.Equal(t, "", params.URL.Value().String())
 }
 
 func TestCustomValidator(t *testing.T) {
@@ -154,12 +153,12 @@ func TestCustomValidator(t *testing.T) {
 			t.Log("USAGE INFORMATION\n" + buffer.String())
 
 			if !tc.wantError {
-				require.NoError(t, err)
+				assert.NoErrorNow(t, err)
 				return
 			}
 
-			require.Error(t, err)
-			require.Contains(t, err.Error(), errMsg)
+			assert.ErrorNow(t, err)
+			assert.StringContains(t, err.Error(), errMsg)
 		})
 	}
 }

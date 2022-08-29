@@ -6,10 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/plog"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
@@ -41,7 +39,7 @@ func TestDynamic(t *testing.T) {
 				// values, in order.
 				callIx := atomic.AddInt32(&callbackInvoked, 1) - 1
 				t.Logf("callback invoked callIx=%d value=%s", callIx, s)
-				require.True(t, int(callIx) < len(wantedValues))
+				assert.SmallerNow(t, int(callIx), len(wantedValues))
 				assert.Equal(t, wantedValues[callIx], s)
 			},
 		},
@@ -65,8 +63,8 @@ func TestDynamic(t *testing.T) {
 
 	defer parsed.Stop()
 
-	require.Equal(t, wantedValues[0], params.X.Value())
-	require.Equal(t, wantedValues[0], params.Y)
+	assert.EqualNow(t, wantedValues[0], params.X.Value())
+	assert.EqualNow(t, wantedValues[0], params.Y)
 
 	time.Sleep(time.Second)
 
@@ -104,5 +102,5 @@ func TestDynamic(t *testing.T) {
 
 	// each value the parameter ever had must result in exactly one call to
 	// the callback function
-	assert.EqualValues(t, len(wantedValues), atomic.LoadInt32(&callbackInvoked))
+	assert.Equal(t, len(wantedValues), int(atomic.LoadInt32(&callbackInvoked)))
 }

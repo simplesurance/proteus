@@ -4,12 +4,12 @@
 package cfgflags_test
 
 import (
+	"encoding/json"
 	"os"
+	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/plog"
 	"github.com/simplesurance/proteus/sources"
 	"github.com/simplesurance/proteus/sources/cfgflags"
@@ -67,9 +67,9 @@ func TestCfgEnv(t *testing.T) {
 			"enabled_bool": {IsBool: true},
 			"other_bool":   {IsBool: true}},
 	}, &testUpdater{LogFn: plog.TestLogger(t)})
-	require.NoError(t, err)
+	assert.NoErrorNow(t, err)
 
-	require.Equal(t, types.ParamValues{
+	want := types.ParamValues{
 		"": map[string]string{
 			"a":            "1",
 			"b":            "2",
@@ -83,8 +83,17 @@ func TestCfgEnv(t *testing.T) {
 		"flagset2": map[string]string{
 			"a":            "21",
 			"b":            "22",
-			"enabled_bool": "false"}},
-		values)
+			"enabled_bool": "false"}}
+
+	if !reflect.DeepEqual(want, values) {
+		jwant, _ := json.Marshal(want)
+		jhave, _ := json.Marshal(values)
+
+		t.Errorf(
+			"Resulting configuration is invalid:\nWANT\n%s\n\nHAVE:\n%s",
+			jwant, jhave,
+		)
+	}
 }
 
 func TestUnexpectedParameter(t *testing.T) {
@@ -103,7 +112,7 @@ func TestUnexpectedParameter(t *testing.T) {
 		"": map[string]sources.ParameterInfo{
 			"expected": {}},
 	}, &testUpdater{LogFn: plog.TestLogger(t)})
-	assert.Error(t, err)
+	assert.ErrorNow(t, err)
 }
 
 type testUpdater struct {

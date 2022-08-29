@@ -8,9 +8,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/simplesurance/proteus"
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/plog"
 	"github.com/simplesurance/proteus/sources/cfgtest"
 	"github.com/simplesurance/proteus/types"
@@ -192,7 +191,7 @@ func TestEmbeddingParamSet(t *testing.T) {
 	}
 
 	assert.Equal(t, "127.0.0.1", testAppCfg.HTTP.IP)
-	assert.EqualValues(t, 42, testAppCfg.HTTP.Port)
+	assert.Equal(t, 42, testAppCfg.HTTP.Port)
 	assert.Equal(t, "/dev/null", testAppCfg.Log.FileName)
 }
 

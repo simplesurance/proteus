@@ -5,8 +5,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
+	"github.com/simplesurance/proteus/internal/assert"
 	"github.com/simplesurance/proteus/plog"
 )
 
@@ -25,14 +24,14 @@ func TestMarshaling(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.Message, func(t *testing.T) {
 			j, err := json.MarshalIndent(tc, "", "  ")
-			require.NoError(t, err)
+			assert.NoErrorNow(t, err)
 			t.Logf("%s %v", j, err)
 
 			var have plog.Entry
 			err = json.Unmarshal(j, &have)
-			require.NoError(t, err)
+			assert.NoErrorNow(t, err)
 
-			require.Equal(t, have, tc)
+			assert.Equal(t, have, tc)
 		})
 	}
 }
@@ -47,11 +46,11 @@ func TestLog(t *testing.T) {
 	_, thisFile, thisLineNumber, ok := runtime.Caller(0)
 	logger.E("test error message")
 
-	require.NotNil(t, loggedEntry.Caller)
-	require.True(t, ok)
+	assert.NotNilNow(t, loggedEntry.Caller)
+	assert.True(t, ok, "runtime.Caller returned !ok")
 
-	require.Equal(t, thisFile, loggedEntry.Caller.File)
-	require.Equal(t, thisLineNumber+1, loggedEntry.Caller.LineNumber)
+	assert.Equal(t, thisFile, loggedEntry.Caller.File)
+	assert.Equal(t, thisLineNumber+1, loggedEntry.Caller.LineNumber)
 }
 
 func TestSkipCaller(t *testing.T) {
@@ -70,9 +69,9 @@ func TestSkipCaller(t *testing.T) {
 	_, thisFile, thisLineNumber, ok := runtime.Caller(0)
 	logf("test message") // must record this line
 
-	require.NotNil(t, loggedEntry.Caller)
-	require.True(t, ok)
+	assert.NotNilNow(t, loggedEntry.Caller)
+	assert.TrueNow(t, ok, "runtime.Caller() returned !ok")
 
-	require.Equal(t, thisFile, loggedEntry.Caller.File)
-	require.Equal(t, thisLineNumber+1, loggedEntry.Caller.LineNumber)
+	assert.Equal(t, thisFile, loggedEntry.Caller.File)
+	assert.Equal(t, thisLineNumber+1, loggedEntry.Caller.LineNumber)
 }
