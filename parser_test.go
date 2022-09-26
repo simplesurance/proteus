@@ -195,6 +195,51 @@ func TestEmbeddingParamSet(t *testing.T) {
 	assert.Equal(t, "/dev/null", testAppCfg.Log.FileName)
 }
 
+func TestParseWithTrim(t *testing.T) {
+	testWriter := testWriter{t}
+
+	params := struct {
+		TestString string
+		TestInt    int
+		TestURL    *xtypes.URL
+	}{}
+
+	testProvider := cfgtest.New(types.ParamValues{
+		"": map[string]string{
+			"teststring": `
+			value
+			`,
+
+			"testint": `
+
+			42
+			`,
+
+			"testurl": `
+			https://localhost
+			`,
+		},
+	})
+
+	defer testProvider.Stop()
+
+	parsed, err := proteus.MustParse(&params,
+		proteus.WithProviders(testProvider),
+		proteus.WithLogger(plog.TestLogger(t)),
+		proteus.WithValueFormatting(proteus.ValueFormattingOptions{
+			TrimSpace: true,
+		}))
+	if err != nil {
+		t.Logf("Unexpected error parsing configuration: %+v", err)
+		parsed.ErrUsage(testWriter, err)
+		t.FailNow()
+	}
+
+	assert.Equal(t, "value", params.TestString)
+	assert.Equal(t, 42, params.TestInt)
+	assert.Equal(t, "https://localhost", params.TestURL.Value().String())
+}
+
 type testWriter struct {
 	t *testing.T
 }

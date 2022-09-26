@@ -55,6 +55,14 @@ func (u *updater) Peek(setName, paramName string) (*string, error) {
 }
 
 func (u *updater) update(v types.ParamValues, refresh bool) {
+	v = v.Copy()
+
+	for _, set := range v {
+		for paramName, paramValue := range set {
+			set[paramName] = u.parsed.settings.valueFormatting.apply(paramValue)
+		}
+	}
+
 	u.mustBeOnValidIDs(v)
 	u.validateValues(v)
 

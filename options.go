@@ -2,6 +2,7 @@ package proteus
 
 import (
 	"io"
+	"strings"
 
 	"github.com/simplesurance/proteus/plog"
 	"github.com/simplesurance/proteus/sources"
@@ -11,9 +12,10 @@ import (
 type Option func(*settings)
 
 type settings struct {
-	providers   []sources.Provider
-	loggerFn    plog.Logger
-	onelineDesc string
+	providers       []sources.Provider
+	loggerFn        plog.Logger
+	onelineDesc     string
+	valueFormatting ValueFormattingOptions
 
 	// auto-usage (aka --help)
 	autoUsageExitFn func()
@@ -74,4 +76,27 @@ func WithPrintfLogger(logFn func(format string, v ...any)) Option {
 				e.Severity, e.Caller.File, e.Caller.LineNumber, e.Message)
 		}
 	}
+}
+
+// WithValueFormatting specifies options for pre-processing values before
+// using them. See ValueFormattingOptions for more details.
+func WithValueFormatting(o ValueFormattingOptions) Option {
+	return func(p *settings) {
+		p.valueFormatting = o
+	}
+}
+
+// ValueFormattingOptions specifies how values of parameters are "trimmed".
+type ValueFormattingOptions struct {
+	// TrimSpace instructs proteus to trim leading and trailing spaces from
+	// values of parameters.
+	TrimSpace bool
+}
+
+func (t ValueFormattingOptions) apply(v string) string {
+	if t.TrimSpace {
+		v = strings.TrimSpace(v)
+	}
+
+	return v
 }
