@@ -64,3 +64,31 @@ func ExampleMustParse_providers() {
 
 	fmt.Printf("Server: %s:%d\n", params.Server, params.Port)
 }
+
+// ExampleMustParse_trimSpaces instructs proteus to trim values of parameters,
+// removing leading and trailing spaces. This also removes trailing new lines.
+func ExampleMustParse_trimSpaces() {
+	params := struct {
+		Server string
+		Port   uint16
+	}{}
+
+	parsed, err := proteus.MustParse(&params,
+		proteus.WithValueFormatting(proteus.ValueFormattingOptions{
+			TrimSpace: true,
+		}))
+	if err != nil {
+		parsed.ErrUsage(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Server: %s:%d\n", params.Server, params.Port)
+
+	// Calling with:
+	//
+	//   ./app -server "localhost" -port "8080"
+	//
+	// is the same as:
+	//
+	//   ./app -server " localhost \n" -port "8080\n"
+}
