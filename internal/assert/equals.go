@@ -21,6 +21,6 @@ func Equal[T comparable](t testing.TB, a, b T) bool {
 		return true
 	}
 
-	t.Errorf("Values should be equal, but they aren't:\nA: %v\nB:%v", a, b)
+	t.Errorf("Values should be equal, but they aren't:\nA: %v\nB: %v", a, b)
 	return false
 }

@@ -28,6 +28,7 @@ func Example() {
 
 	// Output:
 	// Parameter values:
+	// - help = "false" (default)
 	// - port = "42"
 	// - server = "localhost.localdomain"
 }

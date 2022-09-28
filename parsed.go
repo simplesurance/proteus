@@ -134,18 +134,30 @@ func (p *Parsed) Dump(w io.Writer) {
 	p.protected.valuesMutex.Lock()
 	defer p.protected.valuesMutex.Unlock()
 
-	fmt.Fprintf(w, "Parameter values:\n")
 	merged := p.mergeValues()
-	for _, setName := range mapKeysSorted(merged) {
+
+	fmt.Fprintf(w, "Parameter values:\n")
+	for _, setName := range mapKeysSorted(p.inferedConfig) {
+		set := p.inferedConfig[setName]
+
 		if setName != "" {
 			fmt.Fprintf(w, "\nPARAMETER SET %s:\n", strings.ToUpper(setName))
 		}
 
-		set := merged[setName]
-		for _, paramName := range mapKeysSorted(set) {
-			value := set[paramName]
+		for _, paramName := range mapKeysSorted(set.fields) {
+			param := set.fields[paramName]
+
+			var value string
+			var paramSuffix string
+			if v := merged.Get(setName, paramName); v != nil {
+				value = *v
+			} else {
+				value = param.redactedDefaultValue()
+				paramSuffix = " (default)"
+			}
+
 			redacted := p.inferedConfig[setName].fields[paramName].redactedValue(&value)()
-			fmt.Fprintf(w, "- %s = %q\n", paramName, redacted)
+			fmt.Fprintf(w, "- %s = %q%s\n", paramName, redacted, paramSuffix)
 		}
 	}
 }
