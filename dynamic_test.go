@@ -57,7 +57,7 @@ func TestDynamic(t *testing.T) {
 		proteus.WithProviders(provider))
 	if err != nil {
 		buffer := bytes.Buffer{}
-		parsed.ErrUsage(&buffer, err)
+		parsed.WriteError(&buffer, err)
 		t.Error(buffer.String())
 	}
 

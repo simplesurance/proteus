@@ -30,7 +30,7 @@ func main() {
 
 	parsed, err := proteus.MustParse(&params)
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -66,7 +66,7 @@ func main() {
 
 	parsed, err := proteus.MustParse(&params)
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -132,7 +132,7 @@ func main() {
 
 	parsed, err := proteus.MustParse(&params)
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -176,7 +176,7 @@ func main() {
 
 	parsed, err := proteus.MustParse(&params)
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -207,7 +207,7 @@ func main() {
 	parsed, err := proteus.MustParse(&params,
 		proteus.WithAutoUsage(os.Stderr, "Demo App", func() { os.Exit(0) }))
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 

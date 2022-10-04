@@ -74,7 +74,7 @@ func TestDefaultValueAllTypes(t *testing.T) {
 		proteus.WithLogger(plog.TestLogger(t)))
 	if err != nil {
 		t.Logf("Unexpected error parsing configuration: %+v", err)
-		parsed.ErrUsage(testWriter, err)
+		parsed.WriteError(testWriter, err)
 		t.FailNow()
 	}
 
@@ -134,7 +134,7 @@ func TestEmbeddingParameters(t *testing.T) {
 		proteus.WithLogger(plog.TestLogger(t)))
 	if err != nil {
 		t.Logf("Unexpected error parsing configuration: %+v", err)
-		parsed.ErrUsage(testWriter, err)
+		parsed.WriteError(testWriter, err)
 		t.FailNow()
 	}
 
@@ -186,7 +186,7 @@ func TestEmbeddingParamSet(t *testing.T) {
 		proteus.WithLogger(plog.TestLogger(t)))
 	if err != nil {
 		t.Logf("Unexpected error parsing configuration: %+v", err)
-		parsed.ErrUsage(testWriter, err)
+		parsed.WriteError(testWriter, err)
 		t.FailNow()
 	}
 
@@ -231,7 +231,7 @@ func TestParseWithTrim(t *testing.T) {
 		}))
 	if err != nil {
 		t.Logf("Unexpected error parsing configuration: %+v", err)
-		parsed.ErrUsage(testWriter, err)
+		parsed.WriteError(testWriter, err)
 		t.FailNow()
 	}
 
