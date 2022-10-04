@@ -17,7 +17,7 @@ func ExampleMustParse() {
 
 	parsed, err := proteus.MustParse(&params)
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -36,7 +36,7 @@ func ExampleMustParse_withTags() {
 
 	parsed, err := proteus.MustParse(&params)
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -58,7 +58,7 @@ func ExampleMustParse_providers() {
 			cfgenv.New("CONFIG"), // change env var prefix to CONFIG
 			cfgflags.New()))      // flags are used, but priority is to env vars
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -78,7 +78,7 @@ func ExampleMustParse_trimSpaces() {
 			TrimSpace: true,
 		}))
 	if err != nil {
-		parsed.ErrUsage(os.Stderr, err)
+		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
 	}
 

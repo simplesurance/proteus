@@ -26,14 +26,15 @@ type Parsed struct {
 	}
 }
 
-// ErrUsage is a specialized version of Usage(), that is intended
-// to be used when configuration parsing failed. Additionally to the
-// usage text, it also outputs the validation errors with the supplied
-// parameters. It does not terminate the application.
-func (p *Parsed) ErrUsage(w io.Writer, err error) {
+// WriteError writes the strings representation of err to w.
+// The line is prefixed with "ERROR: " .
+func (p *Parsed) WriteError(w io.Writer, err error) {
 	// TODO: the output here can be a lot more insightful
-	fmt.Fprintf(w, "%s: %s\n", binaryName(), err.Error())
-	p.usage(w)
+	fmt.Fprintf(w, "config error: %s\n", err.Error())
+	// the full path to the binary is used instead of only the name, to
+	// ensure that the quoted '%s --help' part can be copy&pasted and
+	// contains a valid path to run the binary
+	fmt.Fprintf(w, "\nRun '%s --help' for more information.\n", os.Args[0])
 }
 
 // Usage prints usage and detailed help output to the provided writer.
