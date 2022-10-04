@@ -44,38 +44,89 @@ func (p *Parsed) Usage(w io.Writer) {
 }
 
 func (p *Parsed) usage(w io.Writer) {
+	const maxLineLen = 79
 	setKeys := sortedConfigKeys(p.inferedConfig)
-	cmdLine := []string{binaryName()}
+	cmdLine := []string{"Usage: " + binaryName()}
+
+	// limit the max. number of indentation, otherwise if binaryName() is
+	// very long there would be no space left for the parameters in the line
+	indentSpaces := min(len(cmdLine[0])+1, 20)
+	// curIndentSpaces is the number of spaces used for the following write,
+	// the first "Usage: ..." line must not be indented, only the following ones
+	curIndentSpaces := 0
+
+	if p.settings.onelineDesc != "" {
+		fmt.Fprintln(w, p.settings.onelineDesc)
+	}
 
 	lastSet := ""
 	for _, setName := range setKeys {
 		set := p.inferedConfig[setName]
 
-		if lastSet != setName {
-			lastSet = setName
-			cmdLine = append(cmdLine, setName)
-		}
-
 		if len(set.fields) == 0 {
 			continue
+		}
+
+		if lastSet != setName {
+			writeLines(w, cmdLine, curIndentSpaces, maxLineLen)
+			curIndentSpaces = indentSpaces
+
+			fmt.Fprintln(w)
+			cmdLine = []string{setName}
+			lastSet = setName
 		}
 
 		// describe parameter name, type and options
 		paramNames := sortedParamNames(set)
 		for _, name := range paramNames {
 			field := set.fields[name]
-
-			cmdLine = append(cmdLine, "  "+formatCmdLineParam(name, field))
+			cmdLine = append(cmdLine, formatCmdLineParam(name, field))
 		}
 	}
 
-	if p.settings.onelineDesc != "" {
-		fmt.Fprintln(w, p.settings.onelineDesc)
-		fmt.Fprintln(w)
-	}
+	writeLines(w, cmdLine, curIndentSpaces, maxLineLen)
+	fmt.Fprintln(w)
+}
 
-	fmt.Fprintln(w, "Usage:")
-	fmt.Fprintln(w, strings.Join(cmdLine, " \\\n  "))
+func getWhiteSpaces(count int) (res string) {
+	for i := 0; i < count; i++ {
+		res += " "
+	}
+	return res
+}
+
+// writeLines writes the elements in strs, splitted with whitespaces to w,
+// indenting lines with indentSpaces whitespaces and splitting lines when they
+// get longer then maxLineLength characters.
+func writeLines(w io.Writer, strs []string, indentSpaces, maxLineLength int) {
+	if len(strs) == 0 {
+		return
+	}
+	lineIndent := getWhiteSpaces(indentSpaces + len(strs[0]) + 1)
+
+	curLine := 1
+	lineEmpty := true
+
+	n, _ := fmt.Fprint(w, getWhiteSpaces(indentSpaces))
+	written := n
+
+	for _, elem := range strs {
+		if lineEmpty || written+len(elem) < (curLine*maxLineLength) {
+			if !lineEmpty {
+				n, _ = fmt.Fprint(w, " ")
+				written += n
+			}
+			lineEmpty = false
+
+			n, _ = fmt.Fprint(w, elem)
+			written += n
+			continue
+		}
+
+		n, _ = fmt.Fprint(w, "\n"+lineIndent+elem)
+		written += n
+		curLine++
+	}
 }
 
 // help generates a detailed description for each parameter and writes it to w.
@@ -403,6 +454,13 @@ func mapKeysSorted[T any](v map[string]T) []string {
 
 	sort.Strings(ret)
 	return ret
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func sortedParamNames(set paramSet) []string {
