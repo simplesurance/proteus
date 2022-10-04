@@ -205,7 +205,7 @@ func main() {
 	}
 
 	parsed, err := proteus.MustParse(&params,
-		proteus.WithAutoUsage(os.Stderr, "Demo App", func() { os.Exit(0) }))
+		proteus.WithAutoUsage(os.Stderr, func() { os.Exit(0) }))
 	if err != nil {
 		parsed.WriteError(os.Stderr, err)
 		os.Exit(1)
