@@ -20,11 +20,7 @@ func ExampleParsed_Usage() {
 	parsed.Usage(os.Stdout)
 
 	// Output:
-	// Usage:
-	// proteus.test \
-	//     [-help] \
-	//     -server <string> \
-	//     [-port <uint16>]
+	// Usage: proteus.test [-help] -server <string> [-port <uint16>]
 	//
 	// PARAMETERS
 	// - help default=false

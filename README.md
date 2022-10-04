@@ -239,17 +239,9 @@ go run main.go --help
 # - "database.password": parameter is required but was not specified
 # - "database.user": parameter is required but was not specified
 #
-#
-# Usage:
-# app \
-#     [-help] \
-#     -environment <dev|stg|prd> \
-#     -port <uint16> \
-#   database \
-#     -password <string> \
-#     -user <string> \
-#     [-port <uint16>] \
-#     [-server <string>]
+# Usage: main [-help] -environment <dev|stg|prd> -port <uint16>
+#                     database -password <string> -user <string> [-port <uint16>]
+#                              [-server <string>]
 #
 # PARAMETERS
 # - help default=false
