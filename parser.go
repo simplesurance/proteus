@@ -457,6 +457,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 				// help usage instead of terminate the application.
 				validFn: func(v string) error {
 					parsed.Usage(opts.autoUsageWriter)
+					parsed.help(opts.autoUsageWriter)
 					parsed.settings.autoUsageExitFn()
 
 					fmt.Fprintln(opts.autoUsageWriter, "WARNING: the provided termination function did not terminated the application")

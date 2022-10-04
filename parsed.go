@@ -33,19 +33,17 @@ type Parsed struct {
 func (p *Parsed) ErrUsage(w io.Writer, err error) {
 	// TODO: the output here can be a lot more insightful
 	fmt.Fprintf(w, "%s: %s\n", binaryName(), err.Error())
-	p.Usage(w)
+	p.usage(w)
 }
 
-// Usage print usage information to the provided writer.
+// Usage prints usage and detailed help output to the provided writer.
 func (p *Parsed) Usage(w io.Writer) {
-	setKeys := make([]string, 0, len(p.inferedConfig))
-	for k := range p.inferedConfig {
-		setKeys = append(setKeys, k)
-	}
+	p.usage(w)
+	p.help(w)
+}
 
-	sort.Strings(setKeys)
-
-	paramDoc := strings.Builder{}
+func (p *Parsed) usage(w io.Writer) {
+	setKeys := sortedConfigKeys(p.inferedConfig)
 	cmdLine := []string{binaryName()}
 
 	lastSet := ""
@@ -55,6 +53,41 @@ func (p *Parsed) Usage(w io.Writer) {
 		if lastSet != setName {
 			lastSet = setName
 			cmdLine = append(cmdLine, setName)
+		}
+
+		if len(set.fields) == 0 {
+			continue
+		}
+
+		// describe parameter name, type and options
+		paramNames := sortedParamNames(set)
+		for _, name := range paramNames {
+			field := set.fields[name]
+
+			cmdLine = append(cmdLine, "  "+formatCmdLineParam(name, field))
+		}
+	}
+
+	if p.settings.onelineDesc != "" {
+		fmt.Fprintln(w, p.settings.onelineDesc)
+		fmt.Fprintln(w)
+	}
+
+	fmt.Fprintln(w, "Usage:")
+	fmt.Fprintln(w, strings.Join(cmdLine, " \\\n  "))
+}
+
+// help generates a detailed description for each parameter and writes it to w.
+func (p *Parsed) help(w io.Writer) {
+	setKeys := sortedConfigKeys(p.inferedConfig)
+	paramDoc := strings.Builder{}
+
+	lastSet := ""
+	for _, setName := range setKeys {
+		set := p.inferedConfig[setName]
+
+		if lastSet != setName {
+			lastSet = setName
 		}
 
 		if len(set.fields) == 0 {
@@ -71,35 +104,10 @@ func (p *Parsed) Usage(w io.Writer) {
 			}
 		}
 
-		// sort by parameter names
-		paramNames := make([]string, 0, len(set.fields))
-		for k := range set.fields {
-			paramNames = append(paramNames, k)
-		}
-
-		sort.Slice(paramNames, func(i, j int) bool {
-			p1 := set.fields[paramNames[i]]
-			p2 := set.fields[paramNames[j]]
-
-			// special parameters come first
-			if p1.isSpecial != p2.isSpecial {
-				return p1.isSpecial
-			}
-
-			// then mandatory fields
-			if p1.optional != p2.optional {
-				return p2.optional
-			}
-
-			// then lexicographic order
-			return paramNames[i] < paramNames[j]
-		})
-
 		// describe parameter name, type and options
+		paramNames := sortedParamNames(set)
 		for _, name := range paramNames {
 			field := set.fields[name]
-
-			cmdLine = append(cmdLine, "  "+formatCmdLineParam(name, field))
 
 			opts := []string{fmt.Sprintf("- %s", name)}
 			if field.secret {
@@ -117,14 +125,6 @@ func (p *Parsed) Usage(w io.Writer) {
 			}
 		}
 	}
-
-	if p.settings.onelineDesc != "" {
-		fmt.Fprintln(w, p.settings.onelineDesc)
-		fmt.Fprintln(w)
-	}
-
-	fmt.Fprintln(w, "Usage:")
-	fmt.Fprintln(w, strings.Join(cmdLine, " \\\n  "))
 
 	fmt.Fprintln(w, paramDoc.String())
 }
@@ -403,4 +403,42 @@ func mapKeysSorted[T any](v map[string]T) []string {
 
 	sort.Strings(ret)
 	return ret
+}
+
+func sortedParamNames(set paramSet) []string {
+	paramNames := make([]string, 0, len(set.fields))
+	for k := range set.fields {
+		paramNames = append(paramNames, k)
+	}
+
+	sort.Slice(paramNames, func(i, j int) bool {
+		p1 := set.fields[paramNames[i]]
+		p2 := set.fields[paramNames[j]]
+
+		// special parameters come first
+		if p1.isSpecial != p2.isSpecial {
+			return p1.isSpecial
+		}
+
+		// then mandatory fields
+		if p1.optional != p2.optional {
+			return p2.optional
+		}
+
+		// then lexicographic order
+		return paramNames[i] < paramNames[j]
+	})
+
+	return paramNames
+}
+
+func sortedConfigKeys(cfg config) []string {
+	setKeys := make([]string, 0, len(cfg))
+	for k := range cfg {
+		setKeys = append(setKeys, k)
+	}
+
+	sort.Strings(setKeys)
+
+	return setKeys
 }
