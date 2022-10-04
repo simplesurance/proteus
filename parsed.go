@@ -379,8 +379,7 @@ func (p *Parsed) desiredValue(setName, paramName string) *string {
 }
 
 func binaryName() string {
-	_, ret := filepath.Split(os.Args[0])
-	return ret
+	return filepath.Base(os.Args[0])
 }
 
 func formatCmdLineParam(cmd string, field paramSetField) string {
