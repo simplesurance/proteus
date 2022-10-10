@@ -88,13 +88,6 @@ func (p *Parsed) usage(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
-func getWhiteSpaces(count int) (res string) {
-	for i := 0; i < count; i++ {
-		res += " "
-	}
-	return res
-}
-
 // writeLines writes the elements in strs, splitted with whitespaces to w,
 // indenting lines with indentSpaces whitespaces and splitting lines when they
 // get longer then maxLineLength characters.
@@ -102,12 +95,12 @@ func writeLines(w io.Writer, strs []string, indentSpaces, maxLineLength int) {
 	if len(strs) == 0 {
 		return
 	}
-	lineIndent := getWhiteSpaces(indentSpaces + len(strs[0]) + 1)
+	lineIndent := strings.Repeat(" ", indentSpaces+len(strs[0])+1)
 
 	curLine := 1
 	lineEmpty := true
 
-	n, _ := fmt.Fprint(w, getWhiteSpaces(indentSpaces))
+	n, _ := fmt.Fprint(w, strings.Repeat(" ", indentSpaces))
 	written := n
 
 	for _, elem := range strs {
