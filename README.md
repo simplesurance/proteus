@@ -233,15 +233,27 @@ func defaultDBParams() dbParams {
 go run main.go --help
 
 # Output:
-# app: Multiple errors:
-# - "environment": parameter is required but was not specified
-# - "port": parameter is required but was not specified
-# - "database.password": parameter is required but was not specified
-# - "database.user": parameter is required but was not specified
+# Usage: x [-help] -environment <dev|stg|prd> -port <uint16>
+#          database -password <string> -user <string> [-port <uint16>]
+#                   [-server <string>]
 #
-# Usage: main [-help] -environment <dev|stg|prd> -port <uint16>
-#                     database -password <string> -user <string> [-port <uint16>]
-#                              [-server <string>]
+# PARAMETERS
+# - help default=false
+#   Prints information about how to use this application
+# - environment
+#   Which environment the app is running on
+# - port
+#
+# PARAMETER SET: DATABASE
+# - password
+#   Password for authentication
+# - user
+#   Username for authentication
+# - port default=5432
+#   TCP port number of the database server
+# - server default=localhost
+#   Name of the database server
+#
 #
 # PARAMETERS
 # - help default=false
