@@ -55,7 +55,7 @@ type paramSetField struct {
 	path     string
 
 	// isSpecial specifies that the parameter cannot be specified by all
-	// providers, line --help.
+	// providers, like --help or --version.
 	isSpecial bool
 
 	isXtype      bool // implements the types.XType interface

@@ -20,6 +20,9 @@ type settings struct {
 	// auto-usage (aka --help)
 	autoUsageExitFn func()
 	autoUsageWriter io.Writer
+
+	// version (aka --version)
+	version string
 }
 
 func (s *settings) apply(options ...Option) {
@@ -83,6 +86,12 @@ func WithPrintfLogger(logFn func(format string, v ...any)) Option {
 func WithValueFormatting(o ValueFormattingOptions) Option {
 	return func(p *settings) {
 		p.valueFormatting = o
+	}
+}
+
+func WithVersion(version string) Option {
+	return func(s *settings) {
+		s.version = version
 	}
 }
 
