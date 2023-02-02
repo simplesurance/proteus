@@ -433,6 +433,39 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 	var violations types.ErrViolations
 
+	if opts.version != "" {
+		const versionFlagName = "version"
+		const versionFlagDescription = "Prints the application version to stdout"
+
+		if conflictingVersionParam, exits := appConfig.getParam("", versionFlagName); exits {
+			violations = append(violations, types.Violation{
+				ParamName: versionFlagName,
+				Path:      conflictingVersionParam.path,
+				Message:   `Must not register a parameter called "version" when the version is provided to proteus, since this flag is registered automatically`,
+			})
+		} else {
+			appConfig[""].fields[versionFlagName] = paramSetField{
+				typ:       "bool",
+				optional:  true,
+				desc:      versionFlagDescription,
+				boolean:   true,
+				isSpecial: true,
+
+				// when the --version flag is provided, the
+				// parsed object will try to determine if the
+				// value is valid. Show the version instead.
+				validFn: func(v string) error {
+					fmt.Println(opts.version)
+					os.Exit(0)
+					return nil
+				},
+				setValueFn:   func(_ *string) error { return nil },
+				getDefaultFn: func() (string, error) { return "false", nil },
+				redactFn:     func(s string) string { return s },
+			}
+		}
+	}
+
 	// --help
 	if opts.autoUsageExitFn != nil {
 		helpFlagName := "help"
@@ -442,7 +475,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 			violations = append(violations, types.Violation{
 				ParamName: helpFlagName,
 				Path:      conflictingParam.path,
-				Message:   "The help parameter cannot be used when the auto-usage is requested",
+				Message:   `Must not register a parameter called "help" when the auto-usage is requested`,
 			})
 		} else {
 			appConfig[""].fields[helpFlagName] = paramSetField{
