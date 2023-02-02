@@ -455,7 +455,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 				// parsed object will try to determine if the
 				// value is valid. Show the version instead.
 				validFn: func(v string) error {
-					fmt.Fprintln(os.Stdout, opts.version)
+					fmt.Println(opts.version)
 					os.Exit(0)
 					return nil
 				},
