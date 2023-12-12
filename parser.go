@@ -350,6 +350,10 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 		desc: structField.Tag.Get("param_desc"),
 	}
 
+	if paramName == "-" {
+		return paramName, ret, nil
+	}
+
 	for _, tagOption := range tagParamParts[1:] {
 		switch tagOption {
 		case "optional":
