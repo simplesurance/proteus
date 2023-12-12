@@ -240,6 +240,30 @@ func TestParseWithTrim(t *testing.T) {
 	assert.Equal(t, "https://localhost", params.TestURL.Value().String())
 }
 
+func TestIgnoreInvalidMember(t *testing.T) {
+	testWriter := testWriter{t}
+
+	params := struct {
+		A int    `param:",optional"`
+		B func() `param:"-"`
+	}{}
+
+	testProvider := cfgtest.New(types.ParamValues{"": map[string]string{}})
+
+	defer testProvider.Stop()
+
+	parsed, err := proteus.MustParse(&params,
+		proteus.WithProviders(testProvider),
+		proteus.WithLogger(plog.TestLogger(t)))
+	if err != nil {
+		t.Logf("Unexpected error parsing configuration: %+v", err)
+		parsed.WriteError(testWriter, err)
+		t.FailNow()
+	}
+
+	t.Logf("Configuration field successfully ignored")
+}
+
 type testWriter struct {
 	t *testing.T
 }
