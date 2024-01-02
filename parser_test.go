@@ -6,7 +6,9 @@ package proteus_test
 import (
 	"math"
 	"net/url"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/simplesurance/proteus"
 	"github.com/simplesurance/proteus/internal/assert"
@@ -18,6 +20,7 @@ import (
 
 func TestDefaultValueAllTypes(t *testing.T) {
 	testWriter := testWriter{t}
+	now := time.Now()
 
 	testProvider := cfgtest.New(types.ParamValues{})
 
@@ -36,24 +39,28 @@ func TestDefaultValueAllTypes(t *testing.T) {
 		UI32     uint32                `param:",optional"`
 		UI64     uint64                `param:",optional"`
 		Bool     bool                  `param:",optional"`
+		Time     time.Time             `param:",optional"`
+		Duration time.Duration         `param:",optional"`
 		XStr     *xtypes.String        `param:",optional"`
 		XBool    *xtypes.Bool          `param:",optional"`
 		XOneOf   *xtypes.OneOf         `param:",optional"`
 		XURL     *xtypes.URL           `param:",optional"`
 		XRSAPriv *xtypes.RSAPrivateKey `param:",optional"`
 	}{
-		Str:  "str",
-		I:    math.MinInt,
-		I8:   math.MinInt8,
-		I16:  math.MinInt16,
-		I32:  math.MinInt32,
-		I64:  math.MinInt64,
-		U:    math.MaxUint,
-		UI8:  math.MaxUint8,
-		UI16: math.MaxUint16,
-		UI32: math.MaxUint32,
-		UI64: math.MaxUint64,
-		Bool: true,
+		Str:      "str",
+		I:        math.MinInt,
+		I8:       math.MinInt8,
+		I16:      math.MinInt16,
+		I32:      math.MinInt32,
+		I64:      math.MinInt64,
+		U:        math.MaxUint,
+		UI8:      math.MaxUint8,
+		UI16:     math.MaxUint16,
+		UI32:     math.MaxUint32,
+		UI64:     math.MaxUint64,
+		Bool:     true,
+		Time:     now,
+		Duration: time.Hour,
 		XStr: &xtypes.String{
 			DefaultValue: "def dyn",
 		},
@@ -240,6 +247,40 @@ func TestParseWithTrim(t *testing.T) {
 	assert.Equal(t, "https://localhost", params.TestURL.Value().String())
 }
 
+func TestTimeAndDuration(t *testing.T) {
+	testWriter := testWriter{t}
+	now := time.Now()
+	dur := time.Hour + time.Duration(1)
+
+	params := struct {
+		T time.Time
+		D time.Duration
+	}{}
+
+	testProvider := cfgtest.New(types.ParamValues{"": map[string]string{
+		"t": now.Format(time.RFC3339Nano),
+		"d": dur.String(),
+	}})
+
+	defer testProvider.Stop()
+
+	parsed, err := proteus.MustParse(&params,
+		proteus.WithProviders(testProvider),
+		proteus.WithLogger(plog.TestLogger(t)))
+	if err != nil {
+		t.Logf("Unexpected error parsing configuration: %+v", err)
+		parsed.WriteError(testWriter, err)
+		t.FailNow()
+	}
+
+	assert.EqualFn(t, now, params.T)
+	assert.Equal(t, dur, params.D)
+
+	sb := strings.Builder{}
+	parsed.Dump(&sb)
+	t.Log(sb.String())
+}
+
 func TestIgnoreInvalidMember(t *testing.T) {
 	testWriter := testWriter{t}
 
@@ -260,6 +301,10 @@ func TestIgnoreInvalidMember(t *testing.T) {
 		parsed.WriteError(testWriter, err)
 		t.FailNow()
 	}
+
+	sb := strings.Builder{}
+	parsed.Dump(&sb)
+	t.Log(sb.String())
 
 	t.Logf("Configuration field successfully ignored")
 }

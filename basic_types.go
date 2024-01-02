@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error {
@@ -11,6 +12,54 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 	// redacting the "password" part of an URL. For basic types use
 	// the identity function.
 	fieldData.redactFn = func(s string) string { return s }
+
+	// try compound values
+	switch valT := val.Interface().(type) {
+	case time.Time:
+		fieldData.validFn = func(str string) error {
+			_, err := time.Parse(time.RFC3339Nano, str)
+			return err
+		}
+
+		fieldData.setValueFn = func(str *string) error {
+			panicOnNil(str)
+			v, err := time.Parse(time.RFC3339Nano, *str)
+			if err != nil {
+				return err
+			}
+
+			val.Set(reflect.ValueOf(v))
+			return nil
+		}
+
+		fieldData.getDefaultFn = func() (string, error) {
+			return valT.Format(time.RFC3339Nano), nil
+		}
+
+		return nil
+	case time.Duration:
+		fieldData.validFn = func(str string) error {
+			_, err := time.ParseDuration(str)
+			return err
+		}
+
+		fieldData.setValueFn = func(str *string) error {
+			panicOnNil(str)
+			v, err := time.ParseDuration(*str)
+			if err != nil {
+				return err
+			}
+
+			val.Set(reflect.ValueOf(v))
+			return nil
+		}
+
+		fieldData.getDefaultFn = func() (string, error) {
+			return valT.String(), nil
+		}
+
+		return nil
+	}
 
 	// non-xtype values are either left alone with whatever value they
 	// had initially, or written once, with a value provided by a
