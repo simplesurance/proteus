@@ -53,6 +53,6 @@ jobs:
           go-version: ${{ matrix.go }}
           cache: true
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           version: ${{ matrix.lint }}
