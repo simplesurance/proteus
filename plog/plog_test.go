@@ -59,7 +59,7 @@ func TestSkipCaller(t *testing.T) {
 		loggedEntry = e
 	}
 
-	logf := func(m string) {
+	logf := func(_ string) {
 		// The log entry should not register the following file/line number;
 		// It should register instead its caller.
 		logger.E("test error", plog.SkipCallers(1))

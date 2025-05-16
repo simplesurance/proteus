@@ -76,7 +76,7 @@ func (r *TestProvider) Stop() {
 // variables never change, we only read once, and we don't have to watch
 // for changes.
 func (r *TestProvider) Watch(
-	paramIDs sources.Parameters,
+	_ sources.Parameters,
 	updater sources.Updater,
 ) (initial types.ParamValues, err error) {
 	r.updater = updater

@@ -1,25 +1,55 @@
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
-    - deadcode
+    - copyloopvar
     - errcheck
-    - exportloopref
-    - goimports
-    - revive
-    - gosimple
+    - gocyclo
+    - godox
+    - goprintffuncname
+    - govet
     - ineffassign
     - misspell
+    - noctx
     - prealloc
+    - revive
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
-    - structcheck
-    - typecheck
     - unconvert
     - unused
-    - varcheck
-    - vet
-
-linters-settings:
-  goimports:
-    local-prefixes: github.com/simplesurance/proteus
+  settings:
+    staticcheck:
+      checks:
+        - "all"
+    gocyclo:
+      # Minimal code complexity to report.
+      # Default: 30 (but we recommend 10-20)
+      min-complexity: 18
+    godox:
+      keywords:
+        - FIXME
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/simplesurance/proteus
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

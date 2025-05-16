@@ -130,6 +130,6 @@ func (t *testUpdater) Log(entry plog.Entry) {
 	t.LogFn(entry)
 }
 
-func (t *testUpdater) Peek(setName, paramName string) (*string, error) {
+func (t *testUpdater) Peek(_, _ string) (*string, error) {
 	return nil, nil // flags do not peek values from other provider
 }

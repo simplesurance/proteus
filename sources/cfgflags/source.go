@@ -58,7 +58,7 @@ func (r *flagProvider) Stop() {
 
 func (r *flagProvider) Watch(
 	paramIDs sources.Parameters,
-	updater sources.Updater,
+	_ sources.Updater,
 ) (initial types.ParamValues, err error) {
 	ret := types.ParamValues{}
 

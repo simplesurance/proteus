@@ -66,7 +66,7 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 	// configuration provider.
 	switch val.Type().Kind() {
 	case reflect.String:
-		fieldData.validFn = func(str string) error {
+		fieldData.validFn = func(_ string) error {
 			return nil
 		}
 

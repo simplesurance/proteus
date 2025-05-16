@@ -134,7 +134,7 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 			cfgflags.New(),
 			cfgenv.New("CFG"),
 		},
-		loggerFn:        func(log plog.Entry) {}, // nop logger
+		loggerFn:        func(_ plog.Entry) {}, // nop logger
 		autoUsageExitFn: func() { os.Exit(0) },
 		autoUsageWriter: os.Stdout,
 	}
@@ -205,7 +205,7 @@ func MustParse(config any, options ...Option) (*Parsed, error) {
 	return &ret, nil
 }
 
-func inferConfigFromValue(value any, opts settings) (config, error) {
+func inferConfigFromValue(value any, _ settings) (config, error) {
 	if reflect.ValueOf(value).Kind() != reflect.Ptr {
 		return nil, errors.New("configuration struct must be a pointer")
 	}
@@ -420,10 +420,10 @@ func parseParam(structField reflect.StructField, fieldVal reflect.Value) (
 		// parameter sets have no value, and the callback functions should
 		// not be called; install handlers to help debug in case of a mistake.
 		panicMessage := fmt.Sprintf("%q is a paramset, it have no value", paramName)
-		ret.validFn = func(v string) error { panic(panicMessage) }
-		ret.setValueFn = func(v *string) error { panic(panicMessage) }
+		ret.validFn = func(_ string) error { panic(panicMessage) }
+		ret.setValueFn = func(_ *string) error { panic(panicMessage) }
 		ret.getDefaultFn = func() (string, error) { panic(panicMessage) }
-		ret.redactFn = func(s string) string { panic(panicMessage) }
+		ret.redactFn = func(_ string) string { panic(panicMessage) }
 
 		return paramName, ret, nil
 	}
@@ -458,7 +458,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 				// when the --version flag is provided, the
 				// parsed object will try to determine if the
 				// value is valid. Show the version instead.
-				validFn: func(v string) error {
+				validFn: func(_ string) error {
 					fmt.Println(opts.version)
 					os.Exit(0)
 					return nil
@@ -492,7 +492,7 @@ func addSpecialFlags(appConfig config, parsed *Parsed, opts settings) error {
 				// when the --help flag is provided, the parsed object will
 				// try to determine if the value is valid. Generate the
 				// help usage instead of terminate the application.
-				validFn: func(v string) error {
+				validFn: func(_ string) error {
 					parsed.Usage(opts.autoUsageWriter)
 					parsed.help(opts.autoUsageWriter)
 					parsed.settings.autoUsageExitFn()

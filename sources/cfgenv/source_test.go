@@ -51,7 +51,7 @@ func TestCfgEnv(t *testing.T) {
 		"paramset3": map[string]sources.ParameterInfo{"a": {}, "b": {}, "c": {}, "enabled_bool": {IsBool: true}, "other_bool": {IsBool: true}},
 	}, &testUpdater{
 		LogFn: plog.TestLogger(t),
-		IsBooleanFn: func(setName, paramName string) bool {
+		IsBooleanFn: func(_, paramName string) bool {
 			return strings.HasSuffix(paramName, "bool")
 		},
 	})
@@ -100,7 +100,7 @@ func TestUnexpectedEnvVar(t *testing.T) {
 		"": map[string]sources.ParameterInfo{"expected": {}},
 	}, &testUpdater{
 		LogFn: plog.TestLogger(t),
-		IsBooleanFn: func(setName, paramName string) bool {
+		IsBooleanFn: func(_, _ string) bool {
 			return false
 		},
 	})
@@ -123,7 +123,7 @@ func (t *testUpdater) Log(entry plog.Entry) {
 	t.LogFn(entry)
 }
 
-func (t *testUpdater) Peek(setName, paramName string) (*string, error) {
+func (*testUpdater) Peek(_, _ string) (*string, error) {
 	// environment variables do not read values from another providers
 	return nil, nil
 }

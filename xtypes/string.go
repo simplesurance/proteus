@@ -52,7 +52,7 @@ func (d *String) Value() string {
 
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
-func (d *String) ValueValid(s string) error {
+func (d *String) ValueValid(_ string) error {
 	return nil
 }
 

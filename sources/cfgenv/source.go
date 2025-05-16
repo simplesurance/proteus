@@ -54,7 +54,7 @@ func (r *envVarProvider) Stop() {
 
 func (r *envVarProvider) Watch(
 	paramIDs sources.Parameters,
-	updater sources.Updater,
+	_ sources.Updater,
 ) (initial types.ParamValues, _ error) {
 	return parse(r.prefix+"__", paramIDs)
 }
