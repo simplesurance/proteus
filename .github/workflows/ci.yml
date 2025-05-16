@@ -12,7 +12,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [1.18, 1.19]
+        go: [1.22, 1.24]
     name: build
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go: [1.18, 1.19]
+        go: [1.22, 1.24]
     name: test
     runs-on: ubuntu-latest
     steps:
