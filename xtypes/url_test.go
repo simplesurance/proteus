@@ -75,7 +75,7 @@ func TestEmptyURL(t *testing.T) {
 	params := struct {
 		URL *xtypes.URL
 	}{
-		URL: &xtypes.URL{ValidateFn: func(u *url.URL) error { return nil }},
+		URL: &xtypes.URL{ValidateFn: func(_ *url.URL) error { return nil }},
 	}
 
 	provider := cfgtest.New(types.ParamValues{

@@ -108,7 +108,7 @@ func TestOneOfCallbackProvidedParameter(t *testing.T) {
 	}{
 		P: &xtypes.OneOf{
 			Choices:  []string{"do", "re", "mi"},
-			UpdateFn: func(s string) { invoked = true },
+			UpdateFn: func(_ string) { invoked = true },
 		},
 	}
 

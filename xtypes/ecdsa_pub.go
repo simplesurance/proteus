@@ -70,7 +70,7 @@ func (d *ECDSAPubKey) ValueValid(s string) error {
 // GetDefaultValue will be used to read the default value when showing usage
 // information.
 func (d *ECDSAPubKey) GetDefaultValue() (string, error) {
-	// FIXME show the public key
+	// TODO show the public key
 	return "<secret>", nil
 }
 

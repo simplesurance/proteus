@@ -449,13 +449,6 @@ func mapKeysSorted[T any](v map[string]T) []string {
 	return ret
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func sortedParamNames(set paramSet) []string {
 	paramNames := make([]string, 0, len(set.fields))
 	for k := range set.fields {
