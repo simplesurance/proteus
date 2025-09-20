@@ -27,7 +27,7 @@ var _ types.XType = &Integer[int]{}
 // UnmarshalParam parses the input as an integer of type T.
 func (d *Integer[T]) UnmarshalParam(in *string) error {
 	var ptrT *T
-	if in != nil {
+	if in != nil && *in != "" {
 		valT, err := parseInt[T](*in)
 		if err != nil {
 			return errors.New("invalid value for the numeric type")
@@ -63,6 +63,9 @@ func (d *Integer[T]) Value() T {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *Integer[T]) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	_, err := parseInt[T](s)
 	return err
 }

@@ -22,7 +22,7 @@ var _ types.XType = &RawJSON{}
 // UnmarshalParam parses the input as a string.
 func (d *RawJSON) UnmarshalParam(in *string) error {
 	var j json.RawMessage
-	if in != nil {
+	if in != nil && *in != "" {
 		err := json.Unmarshal([]byte(*in), &j)
 		if err != nil {
 			return err
@@ -63,6 +63,9 @@ func (d *RawJSON) Value() json.RawMessage {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *RawJSON) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	var j json.RawMessage
 	return json.Unmarshal([]byte(s), &j)
 }

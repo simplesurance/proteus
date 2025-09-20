@@ -442,3 +442,176 @@ func generateTestKey(t *testing.T) (*rsa.PrivateKey, string) {
 	}
 	return privateKey, string(pem.EncodeToMemory(privateKeyPEM))
 }
+
+func TestOptionalBasicTypes(t *testing.T) {
+	tests := []struct {
+		name       string
+		params     types.ParamValues
+		shouldErr  bool
+		expectInt  int
+		expectBool bool
+		expectDur  time.Duration
+	}{
+		{
+			name: "no value for optional params",
+			params: types.ParamValues{
+				"": {
+					"req": "1",
+				},
+			},
+			shouldErr: false,
+			expectInt:  42,
+			expectBool: true,
+			expectDur:  time.Hour,
+		},
+		{
+			name: "empty string for optional params",
+			params: types.ParamValues{
+				"": {
+					"i":    "",
+					"b":    "",
+					"d":    "",
+					"req":  "2",
+				},
+			},
+			shouldErr: false,
+			expectInt:  42,
+			expectBool: true,
+			expectDur:  time.Hour,
+		},
+		{
+			name: "valid values for optional params",
+			params: types.ParamValues{
+				"": {
+					"i":    "123",
+					"b":    "false",
+					"d":    "10s",
+					"req":  "3",
+				},
+			},
+			shouldErr: false,
+			expectInt:  123,
+			expectBool: false,
+			expectDur:  10 * time.Second,
+		},
+		{
+			name: "empty string for required param",
+			params: types.ParamValues{
+				"": {
+					"req": "",
+				},
+			},
+			shouldErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := struct {
+				I   int           `param:",optional"`
+				B   bool          `param:",optional"`
+				D   time.Duration `param:",optional"`
+				Req int
+			}{
+				I:   42,
+				B:   true,
+				D:   time.Hour,
+				Req: 99,
+			}
+
+			testProvider := cfgtest.New(tt.params)
+			defer testProvider.Stop()
+
+			_, err := proteus.MustParse(&cfg, proteus.WithProviders(testProvider))
+
+			if tt.shouldErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectInt, cfg.I)
+				assert.Equal(t, tt.expectBool, cfg.B)
+				assert.Equal(t, tt.expectDur, cfg.D)
+			}
+		})
+	}
+}
+
+func TestOptionalXTypes(t *testing.T) {
+	tests := []struct {
+		name       string
+		params     types.ParamValues
+		shouldErr  bool
+		expectInt  int
+		expectBool bool
+		expectJSON string
+	}{
+		{
+			name:      "no value for optional xtypes",
+			params:    types.ParamValues{"": {"req": "1"}},
+			shouldErr: false,
+			expectInt:  88,
+			expectBool: true,
+			expectJSON: `{"a":"b"}`,
+		},
+		{
+			name: "empty string for optional xtypes",
+			params: types.ParamValues{
+				"": {
+					"xi":   "",
+					"xb":   "",
+					"xj":   "",
+					"req":  "2",
+				},
+			},
+			shouldErr: false,
+			expectInt:  88,
+			expectBool: true,
+			expectJSON: `{"a":"b"}`,
+		},
+		{
+			name: "valid values for optional xtypes",
+			params: types.ParamValues{
+				"": {
+					"xi":   "-5",
+					"xb":   "false",
+					"xj":   `[1,2]`, // raw json
+					"req":  "3",
+				},
+			},
+			shouldErr: false,
+			expectInt:  -5,
+			expectBool: false,
+			expectJSON: `[1,2]`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := struct {
+				XI  *xtypes.Integer[int] `param:",optional"`
+				XB  *xtypes.Bool         `param:",optional"`
+				XJ  *xtypes.RawJSON      `param:",optional"`
+				Req int
+			}{
+				XI: &xtypes.Integer[int]{DefaultValue: 88},
+				XB: &xtypes.Bool{DefaultValue: true},
+				XJ: &xtypes.RawJSON{DefaultValue: []byte(`{"a":"b"}`)},
+				Req: 99,
+			}
+
+			testProvider := cfgtest.New(tt.params)
+			defer testProvider.Stop()
+
+			_, err := proteus.MustParse(&cfg, proteus.WithProviders(testProvider))
+
+			if tt.shouldErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectInt, cfg.XI.Value())
+				assert.Equal(t, tt.expectBool, cfg.XB.Value())
+				assert.Equal(t, tt.expectJSON, string(cfg.XJ.Value()))
+			}
+		})
+	}
+}
