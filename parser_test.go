@@ -4,6 +4,10 @@
 package proteus_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"math"
 	"net/url"
 	"strings"
@@ -316,4 +320,125 @@ type testWriter struct {
 func (t testWriter) Write(v []byte) (int, error) {
 	t.t.Logf("%s", v)
 	return len(v), nil
+}
+
+func TestRSAPrivateKey(t *testing.T) {
+	_, privateKeyStr := generateTestKey(t)
+	defaultKey, _ := generateTestKey(t)
+
+	tests := []struct {
+		name          string
+		params        types.ParamValues
+		shouldErr     bool
+		optionalIsNil bool
+		useDefault    bool
+	}{
+		{
+			name: "valid key for optional and required",
+			params: types.ParamValues{
+				"": {
+					"optionalkey": privateKeyStr,
+					"requiredkey": privateKeyStr,
+				},
+			},
+			shouldErr:     false,
+			optionalIsNil: false,
+		},
+		{
+			name: "empty string for optional key",
+			params: types.ParamValues{
+				"": {
+					"optionalkey": "",
+					"requiredkey": privateKeyStr,
+				},
+			},
+			shouldErr:     false,
+			optionalIsNil: true,
+		},
+		{
+			name: "empty string for optional key with default",
+			params: types.ParamValues{
+				"": {
+					"optionalkey": "",
+					"requiredkey": privateKeyStr,
+				},
+			},
+			shouldErr:     false,
+			optionalIsNil: false,
+			useDefault:    true,
+		},
+		{
+			name: "no value for optional key",
+			params: types.ParamValues{
+				"": {
+					"requiredkey": privateKeyStr,
+				},
+			},
+			shouldErr:     false,
+			optionalIsNil: true,
+		},
+		{
+			name: "empty string for required key",
+			params: types.ParamValues{
+				"": {
+					"requiredkey": "",
+				},
+			},
+			shouldErr: true,
+		},
+		{
+			name:      "no value for required key",
+			params:    types.ParamValues{"": {}},
+			shouldErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := struct {
+				OptionalKey *xtypes.RSAPrivateKey `param:",optional"`
+				RequiredKey *xtypes.RSAPrivateKey
+			}{}
+
+			if tt.useDefault {
+				cfg.OptionalKey = &xtypes.RSAPrivateKey{DefaultValue: defaultKey}
+			}
+
+			testProvider := cfgtest.New(tt.params)
+			defer testProvider.Stop()
+
+			_, err := proteus.MustParse(&cfg,
+				proteus.WithProviders(testProvider))
+
+			if tt.shouldErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				if tt.useDefault {
+					assert.Equal(t, defaultKey, cfg.OptionalKey.Value())
+				} else if tt.optionalIsNil {
+					assert.Equal(t, nil, cfg.OptionalKey.Value())
+				} else {
+					assert.NotNil(t, cfg.OptionalKey.Value())
+				}
+
+				if _, ok := tt.params[""]["requiredkey"]; ok && tt.params[""]["requiredkey"] != "" {
+					assert.NotNil(t, cfg.RequiredKey.Value())
+				}
+			}
+		})
+	}
+}
+
+func generateTestKey(t *testing.T) (*rsa.PrivateKey, string) {
+	t.Helper()
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("failed to generate RSA private key: %v", err)
+	}
+	privateKeyPEM := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+	}
+	return privateKey, string(pem.EncodeToMemory(privateKeyPEM))
 }

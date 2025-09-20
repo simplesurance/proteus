@@ -1,3 +1,4 @@
+//nolint:revive
 package types
 
 // XType is a configuration parameter parameter that supports being updated
