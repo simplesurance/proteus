@@ -1,11 +1,12 @@
 package xtypes_test
 
 import (
-	"bytes"
-	"crypto/ed25519"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
+	"reflect"
 	"testing"
 
 	"github.com/simplesurance/proteus"
@@ -15,34 +16,9 @@ import (
 	"github.com/simplesurance/proteus/xtypes"
 )
 
-func TestEd25519Priv(t *testing.T) {
-	const testPrivED25519Key = `-----BEGIN PRIVATE KEY-----
-MC4CAQAwBQYDK2VwBCIEILeVMy9KxALhIuev5dTLmtb8u9weRofKqd+n7Vifb8G0
------END PRIVATE KEY-----`
-
-	params := struct {
-		Key *xtypes.Ed25519PrivateKey
-	}{}
-
-	testProvider := cfgtest.New(types.ParamValues{
-		"": map[string]string{
-			"key": testPrivED25519Key,
-		},
-	})
-
-	parsed, err := proteus.MustParse(&params, proteus.WithProviders(testProvider))
-	assert.NoErrorNow(t, err)
-
-	buffer := bytes.Buffer{}
-	parsed.Dump(&buffer)
-	t.Logf("Dumped: %s", buffer.String())
-	t.Logf("Priv: %v", params.Key.Value())
-	t.Logf("Public: %v", params.Key.Value().Public())
-}
-
-func TestEd25519PrivateKeyEmpty(t *testing.T) {
-	_, privateKeyStr := generateTestEd25519Key(t)
-	defaultKey, _ := generateTestEd25519Key(t)
+func TestECDSAPublicKey(t *testing.T) {
+	_, publicKeyStr := generateTestECPubKey(t)
+	defaultKey, _ := generateTestECPubKey(t)
 
 	tests := []struct {
 		name          string
@@ -55,8 +31,8 @@ func TestEd25519PrivateKeyEmpty(t *testing.T) {
 			name: "valid key for optional and required",
 			params: types.ParamValues{
 				"": {
-					"optionalkey": privateKeyStr,
-					"requiredkey": privateKeyStr,
+					"optionalkey": publicKeyStr,
+					"requiredkey": publicKeyStr,
 				},
 			},
 			shouldErr:     false,
@@ -67,7 +43,7 @@ func TestEd25519PrivateKeyEmpty(t *testing.T) {
 			params: types.ParamValues{
 				"": {
 					"optionalkey": "",
-					"requiredkey": privateKeyStr,
+					"requiredkey": publicKeyStr,
 				},
 			},
 			shouldErr:     false,
@@ -78,7 +54,7 @@ func TestEd25519PrivateKeyEmpty(t *testing.T) {
 			params: types.ParamValues{
 				"": {
 					"optionalkey": "",
-					"requiredkey": privateKeyStr,
+					"requiredkey": publicKeyStr,
 				},
 			},
 			shouldErr:     false,
@@ -89,7 +65,7 @@ func TestEd25519PrivateKeyEmpty(t *testing.T) {
 			name: "no value for optional key",
 			params: types.ParamValues{
 				"": {
-					"requiredkey": privateKeyStr,
+					"requiredkey": publicKeyStr,
 				},
 			},
 			shouldErr:     false,
@@ -114,12 +90,12 @@ func TestEd25519PrivateKeyEmpty(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := struct {
-				OptionalKey *xtypes.Ed25519PrivateKey `param:",optional"`
-				RequiredKey *xtypes.Ed25519PrivateKey
+				OptionalKey *xtypes.ECDSAPubKey `param:",optional"`
+				RequiredKey *xtypes.ECDSAPubKey
 			}{}
 
 			if tt.useDefault {
-				cfg.OptionalKey = &xtypes.Ed25519PrivateKey{DefaultValue: defaultKey}
+				cfg.OptionalKey = &xtypes.ECDSAPubKey{DefaultValue: defaultKey}
 			}
 
 			testProvider := cfgtest.New(tt.params)
@@ -133,11 +109,9 @@ func TestEd25519PrivateKeyEmpty(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if tt.useDefault {
-					assert.True(t, bytes.Equal(defaultKey, cfg.OptionalKey.Value()), "default key should be used")
+					assert.True(t, reflect.DeepEqual(defaultKey, cfg.OptionalKey.Value()), "default key should be used")
 				} else if tt.optionalIsNil {
-					if cfg.OptionalKey.Value() != nil {
-						t.Errorf("Expected nil, got %v", cfg.OptionalKey.Value())
-					}
+					assert.Equal(t, nil, cfg.OptionalKey.Value())
 				} else {
 					assert.NotNil(t, cfg.OptionalKey.Value())
 				}
@@ -150,19 +124,19 @@ func TestEd25519PrivateKeyEmpty(t *testing.T) {
 	}
 }
 
-func generateTestEd25519Key(t *testing.T) (ed25519.PrivateKey, string) {
+func generateTestECPubKey(t *testing.T) (*ecdsa.PublicKey, string) {
 	t.Helper()
-	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		t.Fatalf("failed to generate Ed25519 private key: %v", err)
+		t.Fatalf("failed to generate ECDSA private key: %v", err)
 	}
-	derBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	derBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
 	if err != nil {
-		t.Fatalf("failed to marshal Ed25519 private key: %v", err)
+		t.Fatalf("failed to marshal ECDSA public key: %v", err)
 	}
 	pemBlock := &pem.Block{
-		Type:  "PRIVATE KEY",
+		Type:  "PUBLIC KEY",
 		Bytes: derBytes,
 	}
-	return privateKey, string(pem.EncodeToMemory(pemBlock))
+	return &privateKey.PublicKey, string(pem.EncodeToMemory(pemBlock))
 }

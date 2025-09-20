@@ -29,7 +29,7 @@ var _ types.Redactor = &Ed25519PrivateKey{}
 // UnmarshalParam parses the input as a string.
 func (d *Ed25519PrivateKey) UnmarshalParam(in *string) error {
 	var privK ed25519.PrivateKey
-	if in != nil {
+	if in != nil && *in != "" {
 		var err error
 		privK, err = parseEd25519PrivateKey(*in, d.Base64Encoder)
 		if err != nil {
@@ -65,6 +65,9 @@ func (d *Ed25519PrivateKey) Value() ed25519.PrivateKey {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *Ed25519PrivateKey) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	_, err := parseEd25519PrivateKey(s, d.Base64Encoder)
 	return err
 }

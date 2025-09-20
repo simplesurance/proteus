@@ -29,7 +29,7 @@ var _ types.Redactor = &ECDSAPrivateKey{}
 // UnmarshalParam parses the input as a string.
 func (d *ECDSAPrivateKey) UnmarshalParam(in *string) error {
 	var privK *ecdsa.PrivateKey
-	if in != nil {
+	if in != nil && *in != "" {
 		var err error
 		privK, err = parseECPrivKey(*in, d.Base64Encoder)
 		if err != nil {
@@ -65,6 +65,9 @@ func (d *ECDSAPrivateKey) Value() *ecdsa.PrivateKey {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *ECDSAPrivateKey) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	_, err := parseECPrivKey(s, d.Base64Encoder)
 	return err
 }

@@ -27,7 +27,7 @@ var _ types.XType = &ECDSAPubKey{}
 // UnmarshalParam parses the input as a string.
 func (d *ECDSAPubKey) UnmarshalParam(in *string) error {
 	var pubK *ecdsa.PublicKey
-	if in != nil {
+	if in != nil && *in != "" {
 		var err error
 		pubK, err = parseECPubKey(*in, d.Base64Encoder)
 		if err != nil {
@@ -63,6 +63,9 @@ func (d *ECDSAPubKey) Value() *ecdsa.PublicKey {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *ECDSAPubKey) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	_, err := parseECPubKey(s, d.Base64Encoder)
 	return err
 }
