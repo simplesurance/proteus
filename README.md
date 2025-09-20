@@ -152,6 +152,19 @@ go run *.go -token my-secret-token
 
 The token is marked as a secret, which is important to avoid leaking its value.
 
+#### Empty Values for Optional Parameters
+
+It's important to understand how optional parameters with default values behave
+when they receive an empty string (`""`) from a configuration source.
+
+For most types (including numeric types, `bool`, `time.Time`, `time.Duration`,
+and most `xtypes`), providing an empty string is treated as an **absent**
+value. This means the parameter will correctly use its specified default value,
+just as it would if the parameter was omitted entirely.
+
+The `string` and `xtypes.String` types are an exception. For these, an empty
+string is considered a valid, intentional value that will override any default.
+
 ### XTypes
 
 _XTypes_ are types provided by _proteus_ to handle complex types and to provide

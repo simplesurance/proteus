@@ -5,8 +5,11 @@ import (
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/simplesurance/proteus/types"
 )
 
+//nolint:gocyclo
 func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error {
 	// the redact function is to allow redacting part of a value, like
 	// redacting the "password" part of an URL. For basic types use
@@ -17,12 +20,18 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 	switch valT := val.Interface().(type) {
 	case time.Time:
 		fieldData.validFn = func(str string) error {
+			if str == "" {
+				return types.ErrNoValue
+			}
 			_, err := time.Parse(time.RFC3339Nano, str)
 			return err
 		}
 
 		fieldData.setValueFn = func(str *string) error {
 			panicOnNil(str)
+			if *str == "" {
+				return nil
+			}
 			v, err := time.Parse(time.RFC3339Nano, *str)
 			if err != nil {
 				return err
@@ -39,12 +48,18 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 		return nil
 	case time.Duration:
 		fieldData.validFn = func(str string) error {
+			if str == "" {
+				return types.ErrNoValue
+			}
 			_, err := time.ParseDuration(str)
 			return err
 		}
 
 		fieldData.setValueFn = func(str *string) error {
 			panicOnNil(str)
+			if *str == "" {
+				return nil
+			}
 			v, err := time.ParseDuration(*str)
 			if err != nil {
 				return err
@@ -84,12 +99,18 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 	case reflect.Bool:
 		fieldData.boolean = true
 		fieldData.validFn = func(str string) error {
+			if str == "" {
+				return types.ErrNoValue
+			}
 			_, err := strconv.ParseBool(str)
 			return err
 		}
 
 		fieldData.setValueFn = func(str *string) error {
 			panicOnNil(str)
+			if *str == "" {
+				return nil
+			}
 			v, err := strconv.ParseBool(*str)
 			if err != nil {
 				return err
@@ -142,6 +163,9 @@ func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error 
 
 func configAsInt(fieldData *paramSetField, val reflect.Value, bitSize int) {
 	fieldData.validFn = func(str string) error {
+		if str == "" {
+			return types.ErrNoValue
+		}
 		_, err := strconv.ParseInt(str, 10, bitSize)
 		if err != nil {
 			return badNumberErr(true, bitSize)
@@ -152,6 +176,9 @@ func configAsInt(fieldData *paramSetField, val reflect.Value, bitSize int) {
 
 	fieldData.setValueFn = func(str *string) error {
 		panicOnNil(str)
+		if *str == "" {
+			return nil
+		}
 		v, err := strconv.ParseInt(*str, 10, bitSize)
 		if err != nil {
 			return badNumberErr(true, bitSize)
@@ -168,6 +195,9 @@ func configAsInt(fieldData *paramSetField, val reflect.Value, bitSize int) {
 
 func configAsUint(fieldData *paramSetField, val reflect.Value, bitSize int) {
 	fieldData.validFn = func(str string) error {
+		if str == "" {
+			return types.ErrNoValue
+		}
 		_, err := strconv.ParseUint(str, 10, bitSize)
 		if err != nil {
 			return badNumberErr(false, bitSize)
@@ -178,6 +208,9 @@ func configAsUint(fieldData *paramSetField, val reflect.Value, bitSize int) {
 
 	fieldData.setValueFn = func(str *string) error {
 		panicOnNil(str)
+		if *str == "" {
+			return nil
+		}
 		v, err := strconv.ParseUint(*str, 10, bitSize)
 		if err != nil {
 			return badNumberErr(false, bitSize)

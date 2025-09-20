@@ -82,6 +82,27 @@ func TestEmptyURL(t *testing.T) {
 		"": map[string]string{"url": ""},
 	})
 
+	_, err := proteus.MustParse(&params, proteus.WithProviders(provider))
+	assert.ErrorNow(t, err)
+}
+
+func TestEmptyOptionalURL(t *testing.T) {
+	defURL, err := url.Parse("https://localhost?xxx")
+	assert.NoErrorNow(t, err)
+
+	params := struct {
+		URL *xtypes.URL `param:",optional"`
+	}{
+		URL: &xtypes.URL{
+			ValidateFn:   func(_ *url.URL) error { return nil },
+			DefaultValue: defURL,
+		},
+	}
+
+	provider := cfgtest.New(types.ParamValues{
+		"": map[string]string{"url": ""},
+	})
+
 	parsed, err := proteus.MustParse(&params, proteus.WithProviders(provider))
 	assert.NoErrorNow(t, err)
 
@@ -93,7 +114,7 @@ func TestEmptyURL(t *testing.T) {
 	parsed.Usage(&buffer)
 	t.Log("USAGE INFORMATION\n" + buffer.String())
 
-	assert.Equal(t, "", params.URL.Value().String())
+	assert.Equal(t, params.URL.Value(), defURL)
 }
 
 func TestCustomValidator(t *testing.T) {

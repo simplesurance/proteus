@@ -25,7 +25,7 @@ var _ types.Redactor = &URL{}
 // UnmarshalParam parses the input as a string.
 func (d *URL) UnmarshalParam(in *string) error {
 	var url *url.URL
-	if in != nil {
+	if in != nil && *in != "" {
 		var err error
 		url, err = parseURL(*in, d.ValidateFn)
 		if err != nil {
@@ -61,6 +61,9 @@ func (d *URL) Value() *url.URL {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *URL) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	_, err := parseURL(s, d.ValidateFn)
 	return err
 }

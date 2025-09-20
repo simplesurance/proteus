@@ -24,7 +24,7 @@ var _ types.XType = &Bool{}
 // UnmarshalParam parses the input as a boolean.
 func (d *Bool) UnmarshalParam(in *string) error {
 	var ptrBool *bool
-	if in != nil {
+	if in != nil && *in != "" {
 		boolValue, err := strconv.ParseBool(*in)
 		if err != nil {
 			return errors.New("not a valid boolean")
@@ -60,6 +60,9 @@ func (d *Bool) Value() bool {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *Bool) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	_, err := strconv.ParseBool(s)
 	return err
 }
