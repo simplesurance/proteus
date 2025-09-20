@@ -31,7 +31,7 @@ var _ types.Redactor = &RSAPrivateKey{}
 // UnmarshalParam parses the input as a string.
 func (d *RSAPrivateKey) UnmarshalParam(in *string) error {
 	var privK *rsa.PrivateKey
-	if in != nil {
+	if in != nil && *in != "" {
 		var err error
 		privK, err = parseRSAPriv(*in, d.Base64Encoder)
 		if err != nil {
@@ -67,6 +67,9 @@ func (d *RSAPrivateKey) Value() *rsa.PrivateKey {
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
 func (d *RSAPrivateKey) ValueValid(s string) error {
+	if s == "" {
+		return types.ErrNoValue
+	}
 	_, err := parseRSAPriv(s, d.Base64Encoder)
 	return err
 }

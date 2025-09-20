@@ -1,3 +1,4 @@
+//nolint:revive
 package types
 
 // ParamValues holds the values of the configuration parameters, as read by

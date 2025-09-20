@@ -330,19 +330,26 @@ func (p *Parsed) validValue(setName, paramName string, value *string) error {
 		return fmt.Errorf("param %s.%s does not exit", setName, paramName)
 	}
 
-	if value == nil {
+	checkRequired := func() error {
 		if !param.optional {
 			return types.ErrViolations([]types.Violation{{
 				SetName:   setName,
 				ParamName: paramName,
-				Message:   "parameter is required but was not specified"}})
+				Message:   "parameter is required but was not specified",
+			}})
 		}
-
 		return nil
+	}
+
+	if value == nil {
+		return checkRequired()
 	}
 
 	err := param.validFn(*value)
 	if err != nil {
+		if errors.Is(err, types.ErrNoValue) {
+			return checkRequired()
+		}
 		return types.ErrViolations([]types.Violation{{
 			SetName:   setName,
 			ParamName: paramName,
