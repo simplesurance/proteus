@@ -444,6 +444,7 @@ func generateTestKey(t *testing.T) (*rsa.PrivateKey, string) {
 }
 
 func TestOptionalBasicTypes(t *testing.T) {
+	now := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	tests := []struct {
 		name       string
 		params     types.ParamValues
@@ -451,6 +452,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 		expectInt  int
 		expectBool bool
 		expectDur  time.Duration
+		expectTime time.Time
 	}{
 		{
 			name: "no value for optional params",
@@ -463,6 +465,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 			expectInt:  42,
 			expectBool: true,
 			expectDur:  time.Hour,
+			expectTime: now,
 		},
 		{
 			name: "empty string for optional params",
@@ -471,6 +474,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 					"i":   "",
 					"b":   "",
 					"d":   "",
+					"t":   "",
 					"req": "2",
 				},
 			},
@@ -478,6 +482,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 			expectInt:  42,
 			expectBool: true,
 			expectDur:  time.Hour,
+			expectTime: now,
 		},
 		{
 			name: "valid values for optional params",
@@ -486,6 +491,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 					"i":   "123",
 					"b":   "false",
 					"d":   "10s",
+					"t":   "2024-01-01T00:00:00Z",
 					"req": "3",
 				},
 			},
@@ -493,6 +499,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 			expectInt:  123,
 			expectBool: false,
 			expectDur:  10 * time.Second,
+			expectTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			name: "empty string for required param",
@@ -511,11 +518,13 @@ func TestOptionalBasicTypes(t *testing.T) {
 				I   int           `param:",optional"`
 				B   bool          `param:",optional"`
 				D   time.Duration `param:",optional"`
+				T   time.Time     `param:",optional"`
 				Req int
 			}{
 				I:   42,
 				B:   true,
 				D:   time.Hour,
+				T:   now,
 				Req: 99,
 			}
 
@@ -531,6 +540,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 				assert.Equal(t, tt.expectInt, cfg.I)
 				assert.Equal(t, tt.expectBool, cfg.B)
 				assert.Equal(t, tt.expectDur, cfg.D)
+				assert.EqualFn(t, tt.expectTime, cfg.T)
 			}
 		})
 	}
