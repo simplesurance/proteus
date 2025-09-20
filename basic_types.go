@@ -9,6 +9,7 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
+//nolint:gocyclo
 func configStandardCallbacks(fieldData *paramSetField, val reflect.Value) error {
 	// the redact function is to allow redacting part of a value, like
 	// redacting the "password" part of an URL. For basic types use

@@ -459,7 +459,7 @@ func TestOptionalBasicTypes(t *testing.T) {
 					"req": "1",
 				},
 			},
-			shouldErr: false,
+			shouldErr:  false,
 			expectInt:  42,
 			expectBool: true,
 			expectDur:  time.Hour,
@@ -468,13 +468,13 @@ func TestOptionalBasicTypes(t *testing.T) {
 			name: "empty string for optional params",
 			params: types.ParamValues{
 				"": {
-					"i":    "",
-					"b":    "",
-					"d":    "",
-					"req":  "2",
+					"i":   "",
+					"b":   "",
+					"d":   "",
+					"req": "2",
 				},
 			},
-			shouldErr: false,
+			shouldErr:  false,
 			expectInt:  42,
 			expectBool: true,
 			expectDur:  time.Hour,
@@ -483,13 +483,13 @@ func TestOptionalBasicTypes(t *testing.T) {
 			name: "valid values for optional params",
 			params: types.ParamValues{
 				"": {
-					"i":    "123",
-					"b":    "false",
-					"d":    "10s",
-					"req":  "3",
+					"i":   "123",
+					"b":   "false",
+					"d":   "10s",
+					"req": "3",
 				},
 			},
-			shouldErr: false,
+			shouldErr:  false,
 			expectInt:  123,
 			expectBool: false,
 			expectDur:  10 * time.Second,
@@ -546,9 +546,9 @@ func TestOptionalXTypes(t *testing.T) {
 		expectJSON string
 	}{
 		{
-			name:      "no value for optional xtypes",
-			params:    types.ParamValues{"": {"req": "1"}},
-			shouldErr: false,
+			name:       "no value for optional xtypes",
+			params:     types.ParamValues{"": {"req": "1"}},
+			shouldErr:  false,
 			expectInt:  88,
 			expectBool: true,
 			expectJSON: `{"a":"b"}`,
@@ -557,13 +557,13 @@ func TestOptionalXTypes(t *testing.T) {
 			name: "empty string for optional xtypes",
 			params: types.ParamValues{
 				"": {
-					"xi":   "",
-					"xb":   "",
-					"xj":   "",
-					"req":  "2",
+					"xi":  "",
+					"xb":  "",
+					"xj":  "",
+					"req": "2",
 				},
 			},
-			shouldErr: false,
+			shouldErr:  false,
 			expectInt:  88,
 			expectBool: true,
 			expectJSON: `{"a":"b"}`,
@@ -572,13 +572,13 @@ func TestOptionalXTypes(t *testing.T) {
 			name: "valid values for optional xtypes",
 			params: types.ParamValues{
 				"": {
-					"xi":   "-5",
-					"xb":   "false",
-					"xj":   `[1,2]`, // raw json
-					"req":  "3",
+					"xi":  "-5",
+					"xb":  "false",
+					"xj":  `[1,2]`, // raw json
+					"req": "3",
 				},
 			},
-			shouldErr: false,
+			shouldErr:  false,
 			expectInt:  -5,
 			expectBool: false,
 			expectJSON: `[1,2]`,
@@ -593,9 +593,9 @@ func TestOptionalXTypes(t *testing.T) {
 				XJ  *xtypes.RawJSON      `param:",optional"`
 				Req int
 			}{
-				XI: &xtypes.Integer[int]{DefaultValue: 88},
-				XB: &xtypes.Bool{DefaultValue: true},
-				XJ: &xtypes.RawJSON{DefaultValue: []byte(`{"a":"b"}`)},
+				XI:  &xtypes.Integer[int]{DefaultValue: 88},
+				XB:  &xtypes.Bool{DefaultValue: true},
+				XJ:  &xtypes.RawJSON{DefaultValue: []byte(`{"a":"b"}`)},
 				Req: 99,
 			}
 
