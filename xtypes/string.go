@@ -10,6 +10,7 @@ import (
 type String struct {
 	DefaultValue string
 	UpdateFn     func(string)
+	ValidateFn   func(string) error
 	content      struct {
 		value *string
 		mutex sync.Mutex
@@ -52,8 +53,12 @@ func (d *String) Value() string {
 
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
-func (d *String) ValueValid(_ string) error {
-	return nil
+func (d *String) ValueValid(v string) error {
+	if d.ValidateFn == nil {
+		return nil
+	}
+
+	return d.ValidateFn(v)
 }
 
 // GetDefaultValue will be used to read the default value when showing usage
