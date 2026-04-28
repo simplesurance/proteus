@@ -86,7 +86,7 @@ func parse(
 		}
 	}
 
-	var violations types.ErrViolations
+	violations := make(types.ErrViolations, 0, len(env))
 	for envName := range env {
 		violations = append(violations, types.Violation{
 			Message: fmt.Sprintf(

@@ -127,4 +127,3 @@ func parseX25519PublicKey(v string, base64Enc *base64.Encoding) (*ecdh.PublicKey
 
 	return nil, fmt.Errorf("invalid X25519 public key: expected PEM, 64-char hex, or 32-byte raw key")
 }
-
