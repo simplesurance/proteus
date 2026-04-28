@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"reflect"
 	"testing"
@@ -139,4 +140,32 @@ func generateTestECPubKey(t *testing.T) (*ecdsa.PublicKey, string) {
 		Bytes: derBytes,
 	}
 	return &privateKey.PublicKey, string(pem.EncodeToMemory(pemBlock))
+}
+
+func TestECDSAPubKey_GetDefaultValue(t *testing.T) {
+	pub, pubPEM := generateTestECPubKey(t)
+
+	t.Run("nil default", func(t *testing.T) {
+		xt := &xtypes.ECDSAPubKey{DefaultValue: nil}
+		val, err := xt.GetDefaultValue()
+		assert.NoError(t, err)
+		assert.Equal(t, "", val)
+	})
+
+	t.Run("standard encoding", func(t *testing.T) {
+		xt := &xtypes.ECDSAPubKey{DefaultValue: pub}
+		val, err := xt.GetDefaultValue()
+		assert.NoError(t, err)
+		assert.Equal(t, pubPEM, val)
+	})
+
+	t.Run("with base64 encoder", func(t *testing.T) {
+		xt := &xtypes.ECDSAPubKey{
+			DefaultValue:  pub,
+			Base64Encoder: base64.StdEncoding,
+		}
+		val, err := xt.GetDefaultValue()
+		assert.NoError(t, err)
+		assert.Equal(t, base64.StdEncoding.EncodeToString([]byte(pubPEM)), val)
+	})
 }

@@ -79,6 +79,9 @@ func (d *X25519PubKey) GetDefaultValue() (string, error) {
 	if d.DefaultValue == nil {
 		return "", nil
 	}
+	if d.Base64Encoder != nil {
+		return d.Base64Encoder.EncodeToString(d.DefaultValue.Bytes()), nil
+	}
 	return hex.EncodeToString(d.DefaultValue.Bytes()), nil
 }
 

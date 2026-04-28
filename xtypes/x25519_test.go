@@ -185,3 +185,32 @@ func generateTestX25519PubKey(t *testing.T, priv *ecdh.PrivateKey) (*ecdh.Public
 	}
 	return pub, string(pem.EncodeToMemory(pemBlock))
 }
+
+func TestX25519PubKey_GetDefaultValue(t *testing.T) {
+	pub, _ := generateTestX25519PubKey(t, nil)
+	pubHex := hex.EncodeToString(pub.Bytes())
+
+	t.Run("nil default", func(t *testing.T) {
+		xt := &xtypes.X25519PubKey{DefaultValue: nil}
+		val, err := xt.GetDefaultValue()
+		assert.NoError(t, err)
+		assert.Equal(t, "", val)
+	})
+
+	t.Run("standard encoding (hex)", func(t *testing.T) {
+		xt := &xtypes.X25519PubKey{DefaultValue: pub}
+		val, err := xt.GetDefaultValue()
+		assert.NoError(t, err)
+		assert.Equal(t, pubHex, val)
+	})
+
+	t.Run("with base64 encoder", func(t *testing.T) {
+		xt := &xtypes.X25519PubKey{
+			DefaultValue:  pub,
+			Base64Encoder: base64.StdEncoding,
+		}
+		val, err := xt.GetDefaultValue()
+		assert.NoError(t, err)
+		assert.Equal(t, base64.StdEncoding.EncodeToString(pub.Bytes()), val)
+	})
+}

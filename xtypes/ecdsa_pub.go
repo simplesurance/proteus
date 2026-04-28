@@ -80,7 +80,15 @@ func (d *ECDSAPubKey) GetDefaultValue() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return base64.StdEncoding.EncodeToString(der), nil
+	pemBlock := &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: der,
+	}
+	pemBytes := pem.EncodeToMemory(pemBlock)
+	if d.Base64Encoder != nil {
+		return d.Base64Encoder.EncodeToString(pemBytes), nil
+	}
+	return string(pemBytes), nil
 }
 
 func parseECPubKey(v string, base64Enc *base64.Encoding) (*ecdsa.PublicKey, error) {
