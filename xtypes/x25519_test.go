@@ -22,7 +22,7 @@ func TestX25519Keys(t *testing.T) {
 
 	cfg := struct {
 		Priv *xtypes.X25519PrivateKey
-		Pub  *xtypes.X25519PublicKey
+		Pub  *xtypes.X25519PubKey
 	}{}
 
 	testProvider := cfgtest.New(types.ParamValues{
@@ -49,7 +49,7 @@ func TestX25519KeysHex(t *testing.T) {
 
 	cfg := struct {
 		Priv *xtypes.X25519PrivateKey
-		Pub  *xtypes.X25519PublicKey
+		Pub  *xtypes.X25519PubKey
 	}{}
 
 	testProvider := cfgtest.New(types.ParamValues{
@@ -76,10 +76,10 @@ func TestX25519KeysBase64Raw(t *testing.T) {
 
 	cfg := struct {
 		Priv *xtypes.X25519PrivateKey
-		Pub  *xtypes.X25519PublicKey
+		Pub  *xtypes.X25519PubKey
 	}{
 		Priv: &xtypes.X25519PrivateKey{Base64Encoder: base64.StdEncoding},
-		Pub:  &xtypes.X25519PublicKey{Base64Encoder: base64.StdEncoding},
+		Pub:  &xtypes.X25519PubKey{Base64Encoder: base64.StdEncoding},
 	}
 
 	testProvider := cfgtest.New(types.ParamValues{
@@ -106,10 +106,10 @@ func TestX25519KeysBase64PEM(t *testing.T) {
 
 	cfg := struct {
 		Priv *xtypes.X25519PrivateKey
-		Pub  *xtypes.X25519PublicKey
+		Pub  *xtypes.X25519PubKey
 	}{
 		Priv: &xtypes.X25519PrivateKey{Base64Encoder: base64.StdEncoding},
-		Pub:  &xtypes.X25519PublicKey{Base64Encoder: base64.StdEncoding},
+		Pub:  &xtypes.X25519PubKey{Base64Encoder: base64.StdEncoding},
 	}
 
 	testProvider := cfgtest.New(types.ParamValues{
@@ -137,7 +137,7 @@ func TestX25519ValueValid(t *testing.T) {
 	assert.Error(t, priv.ValueValid(""))
 
 	_, pubPEM := generateTestX25519PubKey(t, nil)
-	pub := &xtypes.X25519PublicKey{}
+	pub := &xtypes.X25519PubKey{}
 
 	assert.NoError(t, pub.ValueValid(pubPEM))
 	assert.NoError(t, pub.ValueValid(hex.EncodeToString(make([]byte, 32))))
@@ -168,7 +168,10 @@ func generateTestX25519PubKey(t *testing.T, priv *ecdh.PrivateKey) (*ecdh.Public
 	if priv != nil {
 		pub = priv.PublicKey()
 	} else {
-		newPriv, _ := ecdh.X25519().GenerateKey(rand.Reader)
+		newPriv, err := ecdh.X25519().GenerateKey(rand.Reader)
+		if err != nil {
+			t.Fatalf("failed to generate X25519 private key: %v", err)
+		}
 		pub = newPriv.PublicKey()
 	}
 

@@ -73,8 +73,14 @@ func (d *ECDSAPubKey) ValueValid(s string) error {
 // GetDefaultValue will be used to read the default value when showing usage
 // information.
 func (d *ECDSAPubKey) GetDefaultValue() (string, error) {
-	// TODO show the public key
-	return "<secret>", nil
+	if d.DefaultValue == nil {
+		return "", nil
+	}
+	der, err := x509.MarshalPKIXPublicKey(d.DefaultValue)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(der), nil
 }
 
 func parseECPubKey(v string, base64Enc *base64.Encoding) (*ecdsa.PublicKey, error) {
@@ -104,12 +110,12 @@ func parseECPubKey(v string, base64Enc *base64.Encoding) (*ecdsa.PublicKey, erro
 		var err error
 		pubK, err = x509.ParsePKIXPublicKey(pemBlock.Bytes)
 		if err != nil {
-			return nil, fmt.Errorf("error decoding PEM block as ANS.1 public key: %w", err)
+			return nil, fmt.Errorf("error decoding PEM block as ASN.1 public key: %w", err)
 		}
 
 		ecpubK, ok := pubK.(*ecdsa.PublicKey)
 		if !ok {
-			return nil, fmt.Errorf("expected key of type *ecdsa.pubateKey, but got type: %T", pubK)
+			return nil, fmt.Errorf("expected key of type *ecdsa.PublicKey, but got type: %T", pubK)
 		}
 
 		return ecpubK, nil

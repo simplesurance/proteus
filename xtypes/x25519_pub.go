@@ -12,10 +12,10 @@ import (
 	"github.com/simplesurance/proteus/types"
 )
 
-// X25519PublicKey is a xtype for *ecdh.PublicKey. The key format is expected
+// X25519PubKey is a xtype for *ecdh.PublicKey. The key format is expected
 // to be on PKIX/PEM format, hex encoded (32 bytes), or raw bytes (optionally
 // base64 encoded).
-type X25519PublicKey struct {
+type X25519PubKey struct {
 	DefaultValue  *ecdh.PublicKey
 	UpdateFn      func(*ecdh.PublicKey)
 	Base64Encoder *base64.Encoding
@@ -25,10 +25,10 @@ type X25519PublicKey struct {
 	}
 }
 
-var _ types.XType = &X25519PublicKey{}
+var _ types.XType = &X25519PubKey{}
 
 // UnmarshalParam parses the input as a string.
-func (d *X25519PublicKey) UnmarshalParam(in *string) error {
+func (d *X25519PubKey) UnmarshalParam(in *string) error {
 	var pubK *ecdh.PublicKey
 	if in != nil && *in != "" {
 		var err error
@@ -52,7 +52,7 @@ func (d *X25519PublicKey) UnmarshalParam(in *string) error {
 // Value reads the current updated value, taking the default value into
 // consideration. If the parameter is not marked as optional, this is
 // guaranteed to be not nil.
-func (d *X25519PublicKey) Value() *ecdh.PublicKey {
+func (d *X25519PubKey) Value() *ecdh.PublicKey {
 	d.content.mutex.Lock()
 	defer d.content.mutex.Unlock()
 
@@ -65,7 +65,7 @@ func (d *X25519PublicKey) Value() *ecdh.PublicKey {
 
 // ValueValid test if the provided parameter value is valid. Has no side
 // effects.
-func (d *X25519PublicKey) ValueValid(s string) error {
+func (d *X25519PubKey) ValueValid(s string) error {
 	if s == "" {
 		return types.ErrNoValue
 	}
@@ -75,9 +75,11 @@ func (d *X25519PublicKey) ValueValid(s string) error {
 
 // GetDefaultValue will be used to read the default value when showing usage
 // information.
-func (d *X25519PublicKey) GetDefaultValue() (string, error) {
-	// TODO show the public key
-	return "<secret>", nil
+func (d *X25519PubKey) GetDefaultValue() (string, error) {
+	if d.DefaultValue == nil {
+		return "", nil
+	}
+	return hex.EncodeToString(d.DefaultValue.Bytes()), nil
 }
 
 func parseX25519PublicKey(v string, base64Enc *base64.Encoding) (*ecdh.PublicKey, error) {
@@ -103,7 +105,7 @@ func parseX25519PublicKey(v string, base64Enc *base64.Encoding) (*ecdh.PublicKey
 		}
 		pubK, err := x509.ParsePKIXPublicKey(pemBlock.Bytes)
 		if err != nil {
-			return nil, fmt.Errorf("error decoding PEM block as ANS.1 public key: %w", err)
+			return nil, fmt.Errorf("error decoding PEM block as ASN.1 public key: %w", err)
 		}
 		xPubK, ok := pubK.(*ecdh.PublicKey)
 		if !ok || xPubK.Curve() != ecdh.X25519() {
